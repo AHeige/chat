@@ -7,3 +7,13 @@ body {
   -webkit-font-smoothing: antialiased;
   margin: 0px;
 }
+
+.Game2DCanvas {
+    width: 600px;
+    height: 400px;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border: 10px dashed darkgoldenrod;
+}
