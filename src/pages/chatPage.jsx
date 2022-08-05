@@ -5,6 +5,7 @@ import BottomNavigation from "@mui/material/BottomNavigation"
 import Input from "@mui/material/Input"
 import Paper from "@mui/material/Paper"
 import SendIcon from "@mui/icons-material/Send"
+import Game2D from "./Game2D"
 
 const socket = new WebSocket('ws://localhost:8080');
 
@@ -47,9 +48,11 @@ const ChatPage = () => {
   }
 
   return (
+    <div>
+    <Game2D id="aster" senderFunc={ssend}></Game2D>
     <Paper
-      elevation={3}
-      style={{ position: "fixed", bottom: 0, width: "100%" }}
+        elevation={3}
+        style={{ position: "fixed", bottom: 0, width: "100%" }}
     >
       <BottomNavigation>
         <Box
@@ -74,6 +77,7 @@ const ChatPage = () => {
         </Box>
       </BottomNavigation>
     </Paper>
+    </div>
   )
 }
 
