@@ -1,6 +1,10 @@
 # Amazing Game Engine
 
-In one terminal run
+Install node modules with
+
+<code>npm i</code>
+
+Then in one terminal run
 
 <code>node src server.js</code>
 
