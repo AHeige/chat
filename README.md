@@ -6,7 +6,7 @@ Install node modules with
 
 Then in one terminal run
 
-<code>node src server.js</code>
+<code>node src/server.js</code>
 
 and in another run
 
