@@ -1,6 +1,6 @@
 // import React from "react"
-import { SixtyFpsSelectOutlined } from '@mui/icons-material'
 import React, { useRef, useEffect } from 'react'
+import pic32lander from './pic32lander'
 
 let block = {
     x:50,
@@ -157,7 +157,7 @@ function gameLoop(ctx, sender) {
         block.y += block.dy
         block.angle += block.dangle
         if (bounce (block, ctx.canvas.width, ctx.canvas.height, 0)) {
-            sender("bounced right @ " + new Date().toLocaleTimeString("sv-SV"))
+            sender(pic32lander.nextFrame() + " @ " + new Date().toLocaleTimeString("sv-SV"))
         }
         dt = time_ms - lastTime_ms
         requestAnimationFrame(update)
