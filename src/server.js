@@ -11,7 +11,7 @@ function init () {
             console.log('received: %s', data);
             ws.send("Got: " + data);
         });
-        const msg = 'hello from server!'
+        const msg = 'Hello client!'
         ws.send(msg);
         console.log("send: " + msg)
     });

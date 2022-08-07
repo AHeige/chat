@@ -1,52 +1,37 @@
 // import React from "react"
 import React, { useRef, useEffect } from 'react'
+import pic32lander from './pic32lander'
 
-let block = {
-    x:50,
-    y:50,
-    w:10,
-    h:10,
-    dx:3,
-    dy:1,
-    c:'#fff'
+
+
+function renderFps(ctx, frameTime) {
+    ctx.fillStyle = '#fff'
+    ctx.font = '50px courier';
+    ctx.fillText('FPS: ' + pic32lander.round2dec(1/(frameTime/1000), 3), 30, 60);
 }
 
-function renderBlock(ctx, block) {
-    ctx.fillStyle = block.c
-    ctx.fillRect(block.x, block.y, block.w, block.h)
+function clearScreen(ctx) {
+    ctx.fillStyle = '#000'
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 }
 
-function wrap (block, w, h, border) {
-    if (block.x >= w) block.x = border
-    if (block.y >= h) block.y = border
-    if (block.x < border) block.x = w - border
-    if (block.y < border) block.y = h - border
-}
-
-function bounce (block, w, h, border) {
-    if (block.x >= w - block.w - border || block.x < border) block.dx = -block.dx
-    if (block.y >= h - block.h - border || block.y < border) block.dy = -block.dy
-    return block.x >= w - block.w - border
-}
+let lastTime_ms;
 
 
-function gameLoop(ctx, sender) {
-    console.log ("fameloop")
-    function update() {
-        // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-        ctx.fillStyle = '#283202'
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-        renderBlock(ctx, block)
-        block.x += block.dx
-        block.y += block.dy
-        if (bounce (block, ctx.canvas.width, ctx.canvas.height, 0)) {
-            sender("bunced right")
-        }
+function renderLoop(ctx, sender, renderFrameCallback, nextFrameCallback) {
+    console.log ("renderLoop")
+    pic32lander.init()
+    function update(time_ms) {
+        clearScreen(ctx)
+        renderFrameCallback(ctx)
         requestAnimationFrame(update)
-        
+        nextFrameCallback(ctx)
+        renderFps(ctx, time_ms - lastTime_ms)
+        lastTime_ms = time_ms
     }
     update()
 }
+
 
 
 function Game2D (props) {
@@ -55,12 +40,17 @@ function Game2D (props) {
     useEffect(() => {
         const canvas = game2DcanvasRef.current
         const context = canvas.getContext('2d')
-        gameLoop(context, props.senderFunc)
-      }, [])
+        context.canvas.width = 700*4
+        context.canvas.height = 500*4
+        console.log ("Canvas width: " + context.canvas.width)
+        console.log ("Canvas height: " + context.canvas.height)
+
+        renderLoop(context, props.senderFunc, pic32lander.renderFrame, pic32lander.nextFrame)
+
+      }, [props.senderFunc])
   
     return (
         <div>
-            <h1>Game2D</h1>
             <canvas ref={game2DcanvasRef} id={props.id} className="Game2DCanvas"></canvas>
         </div>);
 }
