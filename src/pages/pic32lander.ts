@@ -3,6 +3,18 @@
 // Render the game with a main game renderFrame function.
 // Step to next animation frame with a nextFrame function
 
+import { Headphones } from "@mui/icons-material";
+
+function rnd_(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+}
+
+function rnd(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function round2dec(num: number, dec: number=2): number {
     const exp = Math.pow(10, dec)
     return Math.round((num + Number.EPSILON) * exp) / exp
@@ -13,14 +25,33 @@ type Vec2d = {
     y: number;
 }
 
-function add(to: Vec2d, from: Vec2d) {
+function add(to: Vec2d, from: Vec2d): Vec2d {
     to.x+=from.x
     to.y+=from.y
+    return to
 }
 
-function scalarMultiply(v: Vec2d, s: number) {
+function copy_(to: Vec2d, from: Vec2d): Vec2d {
+    to.x=from.x
+    to.y=from.y
+    return to
+}
+
+function copy(from: Vec2d): Vec2d {
+    let to: Vec2d = {x: 0, y: 0}
+    to.x=from.x
+    to.y=from.y
+    return to
+}
+
+function to_string(v: Vec2d): string {
+     return '(' + round2dec(v.x, 0) + ', ' + round2dec(v.y, 0) + ')'
+}
+
+function scalarMultiply(v: Vec2d, s: number): Vec2d {
     v.x*=s
     v.y*=s
+    return v
 }
 
 function wrap(p: Vec2d, screen: Vec2d) {
@@ -40,6 +71,14 @@ function wrap(p: Vec2d, screen: Vec2d) {
 
 function wrapSpaceObject(so: SpaceObject, screen: Vec2d) {
     wrap(so.position, screen)
+}
+
+function degToRad(deg: number): number {
+    return deg  * Math.PI / 180
+}
+
+function heading(so: SpaceObject): Vec2d {
+    return {x: Math.cos(degToRad(so.angleDegree)), y: Math.sin(degToRad(so.angleDegree))}
 }
 
 function bounceSpaceObject(so: SpaceObject, screen: Vec2d, gap: number = 1) {
@@ -88,7 +127,10 @@ type SpaceObject = {
     fuel: number;
     enginePower: number;
     steeringPower: number;
-
+    ammo: number;
+    shotsInFlight: SpaceObject[];
+    missileSpeed: number;
+    canonCoolDown: number;
 }
 
 function createDefaultSpaceObject(): SpaceObject {
@@ -104,9 +146,13 @@ function createDefaultSpaceObject(): SpaceObject {
         angleDegree: 0,
         health: 100,
         killCount: 0,
-        fuel: 200,
-        enginePower: 0.4,
-        steeringPower: 7
+        fuel: 500,
+        enginePower: 0.25,
+        steeringPower: 5,
+        ammo: 10,
+        shotsInFlight: [],
+        missileSpeed: 30,
+        canonCoolDown: 0
     }
 
     return so
@@ -122,36 +168,66 @@ function drawSpaceObject(so: SpaceObject, ctx: any) {
     }
 }
 
+function drawShot(so: SpaceObject, ctx: any) {
+    for (let shot of so.shotsInFlight) {
+        ctx.fillStyle = '#0f0'
+        ctx.save()
+        ctx.translate(shot.position.x, shot.position.y);
+        ctx.rotate((90 + shot.angleDegree) * Math.PI / 180);
+        ctx.fillRect(-4, -14, 8, 28)
+        ctx.restore()
+    }
+}
+
+
 function drawTriangleObject(so: SpaceObject, ctx: any) {
     let scale: number = 2
     ctx.save()
     ctx.translate(so.position.x, so.position.y);
     ctx.fillStyle = '#fff'
-    ctx.fillRect(-5, -5, 10, 10)
-    ctx.font = '30px courier';
+    // ctx.fillRect(-10, -10, 20, 20)
+    ctx.font = '32px courier';
     if (so.fuel < 10) ctx.fillStyle = '#ee0'
     if (so.fuel < 0.1) ctx.fillStyle = '#e00'
-    ctx.fillText('fuel: ' + round2dec(so.fuel, 1), 150, -80)
+    ctx.fillText('fuel: ' + round2dec(so.fuel, 1), 150, -50)
     ctx.fillStyle = '#fff'
+    ctx.fillText('sif: ' + so.shotsInFlight.length, 150, 0)
+    ctx.fillText(to_string(so.position), 150, -100)
+    ctx.fillText(to_string(so.velocity), 150, -150)
     ctx.rotate((90 + so.angleDegree) * Math.PI / 180);
     ctx.beginPath();
     ctx.strokeStyle = so.color;
     ctx.lineWidth = 5;
+
+    // hull
     ctx.moveTo(0, (-so.size.y/2)*scale);
     ctx.lineTo((-so.size.x/4)*scale, (so.size.y/4)*scale);
     ctx.lineTo((so.size.x/4)*scale, (so.size.y/4)*scale);
     ctx.lineTo(0, (-so.size.y/2)*scale);
+
+
+    // canons
+    ctx.moveTo(8, 10)
+    ctx.lineTo(8, -40)
+    ctx.moveTo(-8, 10)
+    ctx.lineTo(-8, -40)
+
     ctx.stroke();
-    // ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // tower
+    ctx.beginPath();
+    ctx.arc(0, 0, 16, 0, Math.PI * 2)
+    ctx.fill()
     ctx.restore()
-
-    drawVector(so.velocity, so.position, 3, ctx)
-
+    drawVector(so.velocity, so.position, 5, ctx)
+    // drawVector(heading(so), so.position, 45, ctx, {x: -10, y: -10})
+    // drawVector(heading(so), so.position, 45, ctx, {x: 10, y: 10})
+    drawShot(so, ctx)
 }
 
-function drawVector(v: Vec2d, position: Vec2d, scale: number = 2, ctx: any) {
+function drawVector(v: Vec2d, position: Vec2d, scale: number = 2, ctx: any, offset: Vec2d = {x: 0, y:0}) {
     ctx.save()
-    ctx.translate(position.x, position.y);
+    ctx.translate(position.x + offset.x, position.y + offset.y);
     ctx.beginPath();
     ctx.strokeStyle = '#fff'
     ctx.lineWidth = 5;
@@ -161,32 +237,32 @@ function drawVector(v: Vec2d, position: Vec2d, scale: number = 2, ctx: any) {
     ctx.restore()
 }
 
-function updateSpaceObject(so: SpaceObject, ctx: any) {
-    add(so.position, so.velocity)
-    add(so.velocity, so.acceleration)
-}
-
-
 let upPressed: boolean = false
 let downPressed: boolean = false
 let rightPressed: boolean = false
 let leftPressed: boolean = false
+let spacePressed: boolean = false
+let bounce: boolean = false
 
-function arrowControl (e: any) {
+function arrowControl (e: any, value: boolean) {
     if (e.key === "ArrowUp") {
-        upPressed = true
+        upPressed = value
     }
-
     if (e.key === "ArrowDown") {
-        downPressed = true
+        downPressed = value
     }
-
     if (e.key === "ArrowLeft") {
-        leftPressed = true
+        leftPressed = value
     }
-
     if (e.key === "ArrowRight") {
-        rightPressed = true
+        rightPressed = value
+    }
+    if (e.code === "Space") { // wtf code...
+        spacePressed = value
+    }
+    if (e.key === "b") {
+        console.log ({bounce})
+        bounce = value
     }
 }
 
@@ -195,12 +271,13 @@ function clearInputKeys() {
     downPressed = false
     rightPressed = false
     leftPressed = false
+    spacePressed = false
 }
 
 function init() {
     console.log('adds event listeners')
-    document.addEventListener('keydown', (event) => arrowControl(event));
-    document.addEventListener('keyup', (event) => clearInputKeys());
+    document.addEventListener('keydown', (event) => arrowControl(event, true));
+    document.addEventListener('keyup', (event) => arrowControl(event, false));
 }
 
 function applyEngine(so: SpaceObject): number {
@@ -211,6 +288,35 @@ function applyEngine(so: SpaceObject): number {
     so.fuel = 0
     console.log(so.name + " has no more fuel!", so)
     return 0
+}
+
+
+
+function fire(so: SpaceObject) {
+    let shot = createDefaultSpaceObject()
+    let head: Vec2d = copy(so.position)
+    const aimError = 12;
+    head = add(head, scalarMultiply(heading(so), 35))
+    head = add(head, {x: rnd(-aimError, aimError), y: rnd(-aimError, aimError)})
+    shot.velocity = scalarMultiply(heading(so), so.missileSpeed)
+    // shot.position = {x: so.position.x + rnd(-aimError, aimError), y: so.position.y + rnd(-aimError, aimError) }
+    shot.position = head
+    shot.angleDegree = so.angleDegree
+    so.shotsInFlight.push(shot)
+}
+
+function ofScreen(v: Vec2d, screen: Vec2d) {
+    if (v.x > screen.x) return true
+    if (v.x < 0) return true
+    if (v.y > screen.y) return true
+    if (v.y < 0) return true
+    return false
+}
+
+function decayShots(so: SpaceObject, screen: Vec2d) {
+    so.shotsInFlight = so.shotsInFlight.filter(function(e) {
+        return !ofScreen(e.position, screen)
+    })
 }
 
 function applySteer(so: SpaceObject): number {
@@ -237,8 +343,23 @@ function spaceObjectKeyController(so: SpaceObject) {
     if (rightPressed) {
         so.angleDegree+=applySteer(so)
     }
+
+    if (spacePressed) {
+        // console.log ("fire!")
+        fire(so)
+    }
 }
 
+
+function updateSpaceObject(so: SpaceObject, screen: Vec2d) {
+    add(so.position, so.velocity)
+    add(so.velocity, so.acceleration)
+    for (let shot of so.shotsInFlight) {
+        add(shot.position, shot.velocity)
+        add(shot.velocity, shot.acceleration)
+    }
+    decayShots(so, screen)
+}
 
 
 const myShip: SpaceObject = createDefaultSpaceObject()
@@ -248,11 +369,17 @@ function renderFrame (ctx: any) {
 }
 
 function nextFrame (ctx: any) {
+    const screen: Vec2d = {x: ctx.canvas.width, y: ctx.canvas.height}
     spaceObjectKeyController(myShip)
-    // wrapSpaceObject(myShip.position, {x: ctx.canvas.width, y: ctx.canvas.height})
-    bounceSpaceObject(myShip, {x: ctx.canvas.width, y: ctx.canvas.height})
+
+    if (bounce) {
+        bounceSpaceObject(myShip, screen)
+    } else {
+        wrapSpaceObject(myShip, screen)
+    }
+
     friction(myShip, 0.998)
-    updateSpaceObject(myShip, ctx)
+    updateSpaceObject(myShip, screen)
 }
 
 const pic32lander = {renderFrame: renderFrame, nextFrame: nextFrame, init: init, round2dec: round2dec}
