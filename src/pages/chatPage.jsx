@@ -28,12 +28,12 @@ function initws() {
 
     // Connection opened
     socket.addEventListener('open', function (event) {
-        socket.send('Hello Server!');
+        socket.send('Hello server!');
     });
     
     // Listen for messages
     socket.addEventListener('message', function (event) {
-        console.log('Message from server: ', event.data);
+        console.log('Message rx: ', event.data);
     });
     console.log ("init ws done")
 }
