@@ -70,7 +70,7 @@ const ChatPage = () => {
       <Grid container direction={"column"} style={{ alignItems: "flex-end" }}>
         {messages &&
           messages.map((a, index) => (
-            <Grid item style={{ marginTop: "0.3em" }}>
+            <Grid key={index} item style={{ marginTop: "0.3em" }}>
               <Chip key={index} label={a} />
             </Grid>
           ))}
