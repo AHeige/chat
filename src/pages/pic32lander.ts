@@ -147,7 +147,7 @@ function createDefaultSpaceObject(): SpaceObject {
         killCount: 0,
         fuel: 500,
         enginePower: 0.25,
-        steeringPower: 5,
+        steeringPower: 2.5,
         ammo: 10,
         shotsInFlight: [],
         missileSpeed: 30,
@@ -224,7 +224,7 @@ function drawShot(so: SpaceObject, ctx: any) {
         ctx.save()
         ctx.translate(shot.position.x, shot.position.y);
         ctx.rotate((90 + shot.angleDegree) * Math.PI / 180);
-        ctx.fillRect(-3, -16, 6, 32)
+        ctx.fillRect(-shot.size.x/2, -shot.size.y/2, shot.size.x, shot.size.y)
         ctx.restore()
     }
 }
@@ -351,9 +351,10 @@ function applyEngine(so: SpaceObject): number {
 
 function fire(so: SpaceObject) {
     let shot = createDefaultSpaceObject()
-    // shot.color = randomGreen()
+    shot.size = {x: rndi(3, 6), y: rndi(14, 60)}
+    shot.color = randomGreen()
     // shot.color = randomBlue()
-    shot.color = randomRed()
+    // shot.color = randomRed()
     // console.log (shot.color)
     let head: Vec2d = copy(so.position)
     const aimError = 12
@@ -426,8 +427,9 @@ function updateSpaceObject(so: SpaceObject, screen: Vec2d) {
 }
 
 let asteroids: SpaceObject[] = []
-const myShip: SpaceObject = createDefaultSpaceObject()
+let myShip: SpaceObject = createDefaultSpaceObject()
 myShip.name = 'ransed'
+myShip.missileSpeed = 50
 
 function renderFrame (ctx: any) {
     drawSpaceObject(myShip, ctx)
