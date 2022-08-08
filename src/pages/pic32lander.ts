@@ -150,6 +150,8 @@ type SpaceObject = {
   canonCoolDown: number
   shieldPower: number
   colliding: boolean
+  collidingWith: SpaceObject[]
+  damage: number
 }
 
 function createDefaultSpaceObject(): SpaceObject {
@@ -174,6 +176,8 @@ function createDefaultSpaceObject(): SpaceObject {
     canonCoolDown: 0,
     shieldPower: 100,
     colliding: false,
+    collidingWith: [],
+    damage: 0.5
   }
 
   return so
@@ -375,6 +379,10 @@ function arrowControl(e: any, value: boolean) {
     bounce = !bounce
     console.log({ bounce })
   }
+  if (e.key === "i") {
+    console.log({allSpaceObjects})
+    console.log({myShip})
+  }
 }
 
 function applyEngine(so: SpaceObject): number {
@@ -421,11 +429,22 @@ function ofScreen(v: Vec2d, screen: Vec2d) {
   return false
 }
 
-function decayShots(so: SpaceObject, screen: Vec2d) {
-  so.shotsInFlight = so.shotsInFlight.filter(function (e) {
-    return !ofScreen(e.position, screen)
-  })
+
+
+function decayDeadSpaceObjects(so: SpaceObject[]): SpaceObject[] {
+    let out = so.filter(function (e) {
+        return e.health > 0
+    })
+    return out
 }
+
+function decayShots(so: SpaceObject, screen: Vec2d) {
+    so.shotsInFlight = so.shotsInFlight.filter(function (e) {
+        return !ofScreen(e.position, screen)
+    })
+    so.shotsInFlight = decayDeadSpaceObjects(so.shotsInFlight)
+}
+
 
 function applySteer(so: SpaceObject): number {
   return so.steeringPower
@@ -492,18 +511,25 @@ function updateSpaceObject(so: SpaceObject, screen: Vec2d) {
 }
 
 function handleCollisions(spaceObjects: SpaceObject[]) {
+  const vibration: number = 2
   for (let so0 of spaceObjects) {
     for (let so1 of spaceObjects) {
       if (isColliding(so0, so1) && so0.name !== so1.name) {
         so0.colliding = true
         so1.colliding = true
+        so0.collidingWith.push(so1)
+        so1.collidingWith.push(so0)
       }
       for (let shot of so0.shotsInFlight) {
         if (isColliding(shot, so0)) {
-          so0.health--
+          so0.health-=shot.damage
+          so0.position = add(so0.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+          shot.health = 0
         }
         if (isColliding(shot, so1)) {
-          so1.health--
+          so1.health-=shot.damage
+          so1.position = add(so1.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+          shot.health = 0
         }
       }
     }
@@ -519,6 +545,7 @@ function resetCollisions(spaceObjects: SpaceObject[]) {
 const numberOfAsteroids: number = 4
 let myShip: SpaceObject = createDefaultSpaceObject()
 myShip.name = "ransed"
+myShip.health = 60000
 myShip.missileSpeed = 50
 myShip.size = { x: 60, y: 120 }
 
@@ -535,6 +562,7 @@ function renderFrame(ctx: any) {
 function nextFrame(ctx: any) {
   const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
 
+  allSpaceObjects = decayDeadSpaceObjects(allSpaceObjects)
   handleCollisions(allSpaceObjects)
   spaceObjectKeyController(myShip)
 
