@@ -1,7 +1,7 @@
 const ws = require("ws")
 const PORT = 8080
 const wss = new ws.WebSocketServer({
-    port: PORT
+  port: PORT,
 })
 
 // some connected user did send a message. DateTime, UserID, message.
@@ -9,10 +9,10 @@ const wss = new ws.WebSocketServer({
 let connectedUser = []
 
 function broadcastMessage(message) {
-    for (let user of connectedUser) {
-        console.log ({user}, {message})
-        user.sock.send(JSON.stringify(message))
-    }
+  for (let user of connectedUser) {
+    console.log({ user }, { message })
+    user.sock.send(JSON.stringify(message))
+  }
 }
 
 // function addMessageToUser(uid, msg) {
@@ -22,23 +22,21 @@ function broadcastMessage(message) {
 // }
 
 function init() {
-    wss.on("connection", function connection(ws) {
-
-        connectedUser.push({
-            id: connectedUser.length,
-            sock: ws,
-            // messages: []
-        })
-
-        ws.on("message", function message(data) {
-            let parsedObject = JSON.parse(data)
-            parsedObject.rxDate = new Date()
-            // addMessageToUser(uid, parsedObject)
-            broadcastMessage(parsedObject)
-        })
-
+  wss.on("connection", function connection(ws) {
+    connectedUser.push({
+      id: connectedUser.length,
+      sock: ws,
+      // messages: []
     })
-    console.log("server initialized")
+
+    ws.on("message", function message(data) {
+      let parsedObject = JSON.parse(data)
+      parsedObject.rxDate = new Date()
+      // addMessageToUser(uid, parsedObject)
+      broadcastMessage(parsedObject)
+    })
+  })
+  console.log("server initialized")
 }
 
 init()

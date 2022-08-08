@@ -48,8 +48,6 @@ socket.addEventListener("message", function (event) {
 })
 console.log("init ws done")
 
-
-
 //Service
 
 const ChatPage = () => {
@@ -58,8 +56,8 @@ const ChatPage = () => {
 
   const sendMessage = (e) => {
     if (e.key === "Enter") {
-    //   const message = e.target.value
-    //   ssend(message, 1)
+      //   const message = e.target.value
+      //   ssend(message, 1)
       refs.current.value = ""
     }
   }
