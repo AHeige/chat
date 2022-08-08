@@ -59,21 +59,21 @@ function degToRad(deg) {
 function heading(so) {
     return { x: Math.cos(degToRad(so.angleDegree)), y: Math.sin(degToRad(so.angleDegree)) };
 }
-function bounceSpaceObject(so, screen, gap = 1) {
+function bounceSpaceObject(so, screen, energyFactor = 1, gap = 1) {
     if (so.position.x < gap) {
-        so.velocity.x = -so.velocity.x;
+        so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = gap;
     }
     if (so.position.x >= screen.x) {
-        so.velocity.x = -so.velocity.x;
+        so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = screen.x - gap;
     }
     if (so.position.y < gap) {
-        so.velocity.y = -so.velocity.y;
+        so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = gap;
     }
     if (so.position.y >= screen.y) {
-        so.velocity.y = -so.velocity.y;
+        so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = screen.y - gap;
     }
 }
@@ -176,10 +176,10 @@ function drawTriangleObject(so, ctx) {
     ctx.translate(so.position.x, so.position.y);
     ctx.fillStyle = '#fff';
     ctx.font = '32px courier';
-    if (so.fuel < 10)
-        ctx.fillStyle = '#ee0';
-    if (so.fuel < 0.1)
-        ctx.fillStyle = '#e00';
+    if (so.fuel < 250)
+        ctx.fillStyle = '#ff0';
+    if (so.fuel < 150)
+        ctx.fillStyle = '#f00';
     let xtext = 200;
     ctx.fillText('fuel: ' + round2dec(so.fuel, 1), xtext, -50);
     ctx.fillStyle = '#fff';
@@ -349,7 +349,7 @@ function nextFrame(ctx) {
     const screen = { x: ctx.canvas.width, y: ctx.canvas.height };
     spaceObjectKeyController(myShip);
     if (bounce) {
-        bounceSpaceObject(myShip, screen);
+        bounceSpaceObject(myShip, screen, 0.3);
     }
     else {
         wrapSpaceObject(myShip, screen);
@@ -358,7 +358,7 @@ function nextFrame(ctx) {
     updateSpaceObject(myShip, screen);
     for (let asteroid of asteroids) {
         if (bounce) {
-            bounceSpaceObject(asteroid, screen);
+            bounceSpaceObject(asteroid, screen, 0.8);
         }
         else {
             wrapSpaceObject(asteroid, screen);

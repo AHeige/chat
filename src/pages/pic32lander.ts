@@ -79,21 +79,21 @@ function heading(so: SpaceObject): Vec2d {
     return {x: Math.cos(degToRad(so.angleDegree)), y: Math.sin(degToRad(so.angleDegree))}
 }
 
-function bounceSpaceObject(so: SpaceObject, screen: Vec2d, gap: number = 1) {
+function bounceSpaceObject(so: SpaceObject, screen: Vec2d, energyFactor: number = 1, gap: number = 1) {
     if (so.position.x < gap) {
-        so.velocity.x = -so.velocity.x;
+        so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = gap
     }
     if (so.position.x >= screen.x) {
-        so.velocity.x = -so.velocity.x;
+        so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = screen.x - gap
     }
     if (so.position.y < gap) {
-        so.velocity.y = -so.velocity.y;
+        so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = gap
     }
     if (so.position.y >= screen.y) {
-        so.velocity.y = -so.velocity.y;
+        so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = screen.y - gap
     }
 }
@@ -237,8 +237,8 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
     ctx.fillStyle = '#fff'
     // ctx.fillRect(-10, -10, 20, 20)
     ctx.font = '32px courier';
-    if (so.fuel < 10) ctx.fillStyle = '#ee0'
-    if (so.fuel < 0.1) ctx.fillStyle = '#e00'
+    if (so.fuel < 250) ctx.fillStyle = '#ff0'
+    if (so.fuel < 150) ctx.fillStyle = '#f00'
     let xtext: number = 200
     ctx.fillText('fuel: ' + round2dec(so.fuel, 1), xtext, -50)
     ctx.fillStyle = '#fff'
@@ -443,7 +443,7 @@ function nextFrame (ctx: any) {
 
     spaceObjectKeyController(myShip)
     if (bounce) {
-        bounceSpaceObject(myShip, screen)
+        bounceSpaceObject(myShip, screen, 0.3)
     } else {
         wrapSpaceObject(myShip, screen)
     }
@@ -453,7 +453,7 @@ function nextFrame (ctx: any) {
 
     for (let asteroid of asteroids) {
         if (bounce) {
-            bounceSpaceObject(asteroid, screen)
+            bounceSpaceObject(asteroid, screen, 0.8)
         } else {
             wrapSpaceObject(asteroid, screen)
         }

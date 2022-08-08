@@ -10,8 +10,8 @@ body {
 }
 
 .Game2DCanvas {
-    width: 1200px;
-    height: 720px;
+    width: 600;
+    height: 400px;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
