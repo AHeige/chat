@@ -40,8 +40,8 @@ function Game2D (props) {
     useEffect(() => {
         const canvas = game2DcanvasRef.current
         const context = canvas.getContext('2d')
-        context.canvas.width = 600*4
-        context.canvas.height = 400*4
+        context.canvas.width = 400*3
+        context.canvas.height = 300*3
         console.log ("Canvas width: " + context.canvas.width)
         console.log ("Canvas height: " + context.canvas.height)
   

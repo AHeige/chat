@@ -59,6 +59,15 @@ function degToRad(deg) {
 function heading(so) {
     return { x: Math.cos(degToRad(so.angleDegree)), y: Math.sin(degToRad(so.angleDegree)) };
 }
+function isColliding(so0, so1) {
+    if (so0.position.x < so1.position.x + so1.size.x &&
+        so0.position.x + so0.size.x > so1.position.x &&
+        so0.position.y < so1.position.y + so1.size.y &&
+        so0.position.y + so0.size.y > so1.position.y) {
+        return true;
+    }
+    return false;
+}
 function bounceSpaceObject(so, screen, energyFactor = 1, gap = 1) {
     if (so.position.x < gap) {
         so.velocity.x = -so.velocity.x * energyFactor;
@@ -92,7 +101,7 @@ function createDefaultSpaceObject() {
     let so = {
         shape: Shape.Triangle,
         mass: 10,
-        size: { x: 80, y: 120 },
+        size: { x: 40, y: 40 },
         color: '#fff',
         position: { x: rndi(0, 1500), y: rndi(0, 1500) },
         velocity: { x: rndf(-4, 4), y: rndf(-4, 4) },
@@ -106,9 +115,10 @@ function createDefaultSpaceObject() {
         steeringPower: 2.5,
         ammo: 10,
         shotsInFlight: [],
-        missileSpeed: 30,
+        missileSpeed: 5,
         canonCoolDown: 0,
-        shieldPower: 100
+        shieldPower: 100,
+        colliding: false
     };
     return so;
 }
@@ -127,17 +137,12 @@ function drawSpaceObject(so, ctx) {
 function drawAsteroid(so, ctx) {
     ctx.save();
     ctx.translate(so.position.x, so.position.y);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-40, -40, 80, 80);
+    ctx.fillStyle = (so.colliding === true ? '#f00' : so.color);
+    ctx.font = '32px courier';
+    ctx.fillText(so.name, 100, -50);
+    ctx.fillText('health: ' + so.health, 100, 0);
+    ctx.fillRect(-so.size.x / 2, -so.size.y / 2, so.size.x, so.size.y);
     ctx.restore();
-}
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
 function randomColor(r, g, b) {
     return '#' + r[Math.floor(Math.random() * r.length)] + g[Math.floor(Math.random() * g.length)] + b[Math.floor(Math.random() * b.length)];
@@ -158,6 +163,12 @@ function randomRed() {
     const r = '6789ABCDEF';
     const g = '012345';
     const b = '012345';
+    return randomColor(r, g, b);
+}
+function randomAnyColor() {
+    const r = '0123456789ABCDEF';
+    const g = '0123456789ABCDEF';
+    const b = '0123456789ABCDEF';
     return randomColor(r, g, b);
 }
 function drawShot(so, ctx) {
@@ -195,17 +206,22 @@ function drawTriangleObject(so, ctx) {
     ctx.beginPath();
     ctx.strokeStyle = so.color;
     ctx.lineWidth = 5;
+    ctx.strokeStyle = (so.colliding ? '#f00' : so.color);
+    ctx.fillStyle = (so.colliding ? '#f00' : so.color);
     ctx.moveTo(0, (-so.size.y / 2) * scale);
     ctx.lineTo((-so.size.x / 4) * scale, (so.size.y / 4) * scale);
     ctx.lineTo((so.size.x / 4) * scale, (so.size.y / 4) * scale);
     ctx.lineTo(0, (-so.size.y / 2) * scale);
-    ctx.moveTo(8, 10);
-    ctx.lineTo(8, -40);
-    ctx.moveTo(-8, 10);
-    ctx.lineTo(-8, -40);
+    const cannonWidth = 20;
+    const cannonStart = 0;
+    const cannonEnd = 50;
+    ctx.moveTo(cannonWidth, cannonStart);
+    ctx.lineTo(cannonWidth, -cannonEnd);
+    ctx.moveTo(-cannonWidth, cannonStart);
+    ctx.lineTo(-cannonWidth, -cannonEnd);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(0, 0, 16, 0, Math.PI * 2);
+    ctx.arc(0, 20, 16, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
     ctx.lineWidth = 1;
@@ -213,7 +229,6 @@ function drawTriangleObject(so, ctx) {
     ctx.arc(0, 0, 170, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
-    drawVector(so.velocity, so.position, 5, ctx);
     drawShot(so, ctx);
 }
 function drawVector(v, position, scale = 2, ctx, offset = { x: 0, y: 0 }) {
@@ -230,6 +245,8 @@ function drawVector(v, position, scale = 2, ctx, offset = { x: 0, y: 0 }) {
 let upPressed = false;
 let downPressed = false;
 let rightPressed = false;
+let rightStrafePressed = false;
+let leftStrafePressed = false;
 let leftPressed = false;
 let spacePressed = false;
 let bounce = false;
@@ -237,7 +254,13 @@ function arrowControl(e, value) {
     if (e.key === "ArrowUp") {
         upPressed = value;
     }
+    if (e.key === "w") {
+        upPressed = value;
+    }
     if (e.key === "ArrowDown") {
+        downPressed = value;
+    }
+    if (e.key === "s") {
         downPressed = value;
     }
     if (e.key === "ArrowLeft") {
@@ -246,6 +269,12 @@ function arrowControl(e, value) {
     if (e.key === "ArrowRight") {
         rightPressed = value;
     }
+    if (e.key === "a") {
+        leftStrafePressed = value;
+    }
+    if (e.key === "d") {
+        rightStrafePressed = value;
+    }
     if (e.code === "Space") {
         spacePressed = value;
     }
@@ -253,13 +282,6 @@ function arrowControl(e, value) {
         bounce = !bounce;
         console.log({ bounce });
     }
-}
-function clearInputKeys() {
-    upPressed = false;
-    downPressed = false;
-    rightPressed = false;
-    leftPressed = false;
-    spacePressed = false;
 }
 function applyEngine(so) {
     if (so.fuel > 0) {
@@ -272,13 +294,13 @@ function applyEngine(so) {
 }
 function fire(so) {
     let shot = createDefaultSpaceObject();
-    shot.size = { x: rndi(3, 6), y: rndi(14, 60) };
+    shot.size = { x: rndi(2, 6), y: rndi(20, 50) };
     shot.color = randomGreen();
     let head = copy(so.position);
-    const aimError = 12;
-    const headError = 1;
-    const speedError = 5;
-    head = add(head, scalarMultiply(heading(so), 35));
+    const aimError = 15;
+    const headError = 2;
+    const speedError = 10;
+    head = add(head, scalarMultiply(heading(so), 15));
     head = add(head, { x: rndi(-aimError, aimError), y: rndi(-aimError, aimError) });
     shot.velocity = scalarMultiply(heading(so), so.missileSpeed + rndf(0, speedError));
     add(shot.velocity, { x: rndf(-headError, headError), y: rndf(-headError, headError) });
@@ -316,6 +338,16 @@ function spaceObjectKeyController(so) {
         let engine = applyEngine(so);
         add(so.velocity, { x: -engine * Math.cos(angleRadians), y: -engine * Math.sin(angleRadians) });
     }
+    if (leftStrafePressed) {
+        let angleRadians = (so.angleDegree - 90) * Math.PI / 180;
+        let engine = applyEngine(so);
+        add(so.velocity, { x: engine * Math.cos(angleRadians), y: engine * Math.sin(angleRadians) });
+    }
+    if (rightStrafePressed) {
+        let angleRadians = (so.angleDegree + 90) * Math.PI / 180;
+        let engine = applyEngine(so);
+        add(so.velocity, { x: engine * Math.cos(angleRadians), y: engine * Math.sin(angleRadians) });
+    }
     if (leftPressed) {
         so.angleDegree -= applySteer(so);
     }
@@ -335,47 +367,68 @@ function updateSpaceObject(so, screen) {
     }
     decayShots(so, screen);
 }
-let asteroids = [];
+function handleCollisions(spaceObjects) {
+    for (let so0 of spaceObjects) {
+        for (let so1 of spaceObjects) {
+            if (isColliding(so0, so1) && so0.name !== so1.name) {
+                so0.colliding = true;
+                so1.colliding = true;
+            }
+            for (let shot of so0.shotsInFlight) {
+                if (isColliding(shot, so0)) {
+                    so0.health--;
+                }
+                if (isColliding(shot, so1)) {
+                    so1.health--;
+                }
+            }
+        }
+    }
+}
+function resetCollisions(spaceObjects) {
+    for (let so of spaceObjects) {
+        so.colliding = false;
+    }
+}
+const numberOfAsteroids = 4;
 let myShip = createDefaultSpaceObject();
 myShip.name = 'ransed';
 myShip.missileSpeed = 50;
+myShip.size = { x: 60, y: 120 };
+let allSpaceObjects = [];
+allSpaceObjects.push(myShip);
 function renderFrame(ctx) {
-    drawSpaceObject(myShip, ctx);
-    for (let asteroid of asteroids) {
-        drawSpaceObject(asteroid, ctx);
+    for (let so of allSpaceObjects) {
+        drawSpaceObject(so, ctx);
     }
+    resetCollisions(allSpaceObjects);
 }
 function nextFrame(ctx) {
     const screen = { x: ctx.canvas.width, y: ctx.canvas.height };
+    handleCollisions(allSpaceObjects);
     spaceObjectKeyController(myShip);
-    if (bounce) {
-        bounceSpaceObject(myShip, screen, 0.3);
-    }
-    else {
-        wrapSpaceObject(myShip, screen);
-    }
-    friction(myShip, 0.998);
-    updateSpaceObject(myShip, screen);
-    for (let asteroid of asteroids) {
+    for (let so of allSpaceObjects) {
         if (bounce) {
-            bounceSpaceObject(asteroid, screen, 0.8);
+            bounceSpaceObject(so, screen, 0.3);
         }
         else {
-            wrapSpaceObject(asteroid, screen);
+            wrapSpaceObject(so, screen);
         }
-        updateSpaceObject(asteroid, screen);
+        friction(so, 0.992);
+        updateSpaceObject(so, screen);
     }
 }
 function init() {
     console.log('adds event listeners');
     document.addEventListener('keydown', (event) => arrowControl(event, true));
     document.addEventListener('keyup', (event) => arrowControl(event, false));
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < numberOfAsteroids; i++) {
         let a = createDefaultSpaceObject();
         a.shape = Shape.Asteroid;
-        asteroids.push(a);
+        a.name = 'Asteroid #' + i;
+        allSpaceObjects.push(a);
     }
-    console.log(asteroids);
+    console.log(allSpaceObjects);
 }
 const pic32lander = { renderFrame: renderFrame, nextFrame: nextFrame, init: init, round2dec: round2dec };
 exports.default = pic32lander;
