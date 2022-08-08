@@ -3,13 +3,11 @@
 // Render the game with a main game renderFrame function.
 // Step to next animation frame with a nextFrame function
 
-import { Headphones } from "@mui/icons-material";
-
-function rnd_(min: number, max: number) {
+function rndf(min: number, max: number) {
     return Math.random() * (max - min) + min;
 }
 
-function rnd(min: number, max: number) {
+function rndi(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -131,6 +129,7 @@ type SpaceObject = {
     shotsInFlight: SpaceObject[];
     missileSpeed: number;
     canonCoolDown: number;
+    shieldPower: number;
 }
 
 function createDefaultSpaceObject(): SpaceObject {
@@ -139,8 +138,8 @@ function createDefaultSpaceObject(): SpaceObject {
         mass: 10, 
         size: {x: 80, y: 120},
         color: '#fff',
-        position: {x: 600, y: 600},
-        velocity: {x: 0.1, y: 0.1},
+        position: {x: rndi(0, 1500), y: rndi(0, 1500)},
+        velocity: {x: rndf(-4, 4), y: rndf(-4, 4)},
         acceleration: {x: 0, y: 0},
         name: 'SpaceObject',
         angleDegree: 0,
@@ -152,7 +151,8 @@ function createDefaultSpaceObject(): SpaceObject {
         ammo: 10,
         shotsInFlight: [],
         missileSpeed: 30,
-        canonCoolDown: 0
+        canonCoolDown: 0,
+        shieldPower: 100
     }
 
     return so
@@ -163,18 +163,68 @@ function drawSpaceObject(so: SpaceObject, ctx: any) {
         case Shape.Triangle:
             drawTriangleObject(so, ctx)
             break
+        case Shape.Asteroid:
+            drawAsteroid(so, ctx)
+            break
         default:
             console.error("Unknown Shape", so.shape)
     }
 }
 
+function drawAsteroid(so: SpaceObject, ctx: any) {
+    ctx.save()
+    ctx.translate(so.position.x, so.position.y);
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(-40, -40, 80, 80)
+    ctx.restore()
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+function randomColor(r: string, g: string, b: string): string {
+    return '#' + r[Math.floor(Math.random() * r.length)] + g[Math.floor(Math.random() * g.length)] + b[Math.floor(Math.random() * b.length)]
+}
+
+function randomGreen(): string {
+    const r = '012345';
+    const g = '6789ABCDEF';
+    const b = '012345';
+    return randomColor(r, g, b)
+    // return '#' + r[Math.floor(Math.random() * r.length)] + g[Math.floor(Math.random() * g.length)] + b[Math.floor(Math.random() * b.length)]
+}
+
+function randomBlue(): string {
+    const r = '012345';
+    const g = '012345';
+    const b = '6789ABCDEF';
+    return randomColor(r, g, b)
+    // return '#' + r[Math.floor(Math.random() * r.length)] + g[Math.floor(Math.random() * g.length)] + b[Math.floor(Math.random() * b.length)]
+}
+
+function randomRed(): string {
+    const r = '6789ABCDEF';
+    const g = '012345';
+    const b = '012345';
+    return randomColor(r, g, b)
+    // return '#' + r[Math.floor(Math.random() * r.length)] + g[Math.floor(Math.random() * g.length)] + b[Math.floor(Math.random() * b.length)]
+}
+
+
 function drawShot(so: SpaceObject, ctx: any) {
     for (let shot of so.shotsInFlight) {
-        ctx.fillStyle = '#0f0'
+        ctx.fillStyle = shot.color
+        // console.log('shot color: ' + shot.color)
         ctx.save()
         ctx.translate(shot.position.x, shot.position.y);
         ctx.rotate((90 + shot.angleDegree) * Math.PI / 180);
-        ctx.fillRect(-4, -14, 8, 28)
+        ctx.fillRect(-3, -16, 6, 32)
         ctx.restore()
     }
 }
@@ -189,11 +239,17 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
     ctx.font = '32px courier';
     if (so.fuel < 10) ctx.fillStyle = '#ee0'
     if (so.fuel < 0.1) ctx.fillStyle = '#e00'
-    ctx.fillText('fuel: ' + round2dec(so.fuel, 1), 150, -50)
+    let xtext: number = 200
+    ctx.fillText('fuel: ' + round2dec(so.fuel, 1), xtext, -50)
     ctx.fillStyle = '#fff'
-    ctx.fillText('sif: ' + so.shotsInFlight.length, 150, 0)
-    ctx.fillText(to_string(so.position), 150, -100)
-    ctx.fillText(to_string(so.velocity), 150, -150)
+    ctx.fillText(so.name, xtext, -200)
+    ctx.fillText(to_string(so.velocity), xtext, -150)
+    ctx.fillText(to_string(so.position), xtext, -100)
+    ctx.fillText('sif: ' + so.shotsInFlight.length, xtext, 0)
+    ctx.fillText('ammo: ' + so.ammo, xtext, 50)
+    ctx.fillText('health: ' + so.health, xtext, 100)
+    ctx.fillText('shield: ' + so.shieldPower, xtext, 150)
+    ctx.fillText('angle: ' + Math.abs(so.angleDegree%360), xtext, 200)
     ctx.rotate((90 + so.angleDegree) * Math.PI / 180);
     ctx.beginPath();
     ctx.strokeStyle = so.color;
@@ -211,17 +267,23 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
     ctx.lineTo(8, -40)
     ctx.moveTo(-8, 10)
     ctx.lineTo(-8, -40)
-
     ctx.stroke();
 
     // tower
     ctx.beginPath();
     ctx.arc(0, 0, 16, 0, Math.PI * 2)
     ctx.fill()
+
+
+    // shield
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#66f'
+    ctx.arc(0, 0, 170, 0, Math.PI * 2)
+    ctx.stroke()
+
     ctx.restore()
     drawVector(so.velocity, so.position, 5, ctx)
-    // drawVector(heading(so), so.position, 45, ctx, {x: -10, y: -10})
-    // drawVector(heading(so), so.position, 45, ctx, {x: 10, y: 10})
     drawShot(so, ctx)
 }
 
@@ -260,9 +322,9 @@ function arrowControl (e: any, value: boolean) {
     if (e.code === "Space") { // wtf code...
         spacePressed = value
     }
-    if (e.key === "b") {
+    if (e.key === "b" && value) {
+        bounce = !bounce
         console.log ({bounce})
-        bounce = value
     }
 }
 
@@ -274,11 +336,6 @@ function clearInputKeys() {
     spacePressed = false
 }
 
-function init() {
-    console.log('adds event listeners')
-    document.addEventListener('keydown', (event) => arrowControl(event, true));
-    document.addEventListener('keyup', (event) => arrowControl(event, false));
-}
 
 function applyEngine(so: SpaceObject): number {
     if (so.fuel > 0) {
@@ -294,11 +351,18 @@ function applyEngine(so: SpaceObject): number {
 
 function fire(so: SpaceObject) {
     let shot = createDefaultSpaceObject()
+    // shot.color = randomGreen()
+    // shot.color = randomBlue()
+    shot.color = randomRed()
+    // console.log (shot.color)
     let head: Vec2d = copy(so.position)
-    const aimError = 12;
+    const aimError = 12
+    const headError = 1
+    const speedError = 5
     head = add(head, scalarMultiply(heading(so), 35))
-    head = add(head, {x: rnd(-aimError, aimError), y: rnd(-aimError, aimError)})
-    shot.velocity = scalarMultiply(heading(so), so.missileSpeed)
+    head = add(head, {x: rndi(-aimError, aimError), y: rndi(-aimError, aimError)})
+    shot.velocity = scalarMultiply(heading(so), so.missileSpeed + rndf(0, speedError))
+    add(shot.velocity, {x: rndf(-headError, headError), y: rndf(-headError, headError)})
     // shot.position = {x: so.position.x + rnd(-aimError, aimError), y: so.position.y + rnd(-aimError, aimError) }
     shot.position = head
     shot.angleDegree = so.angleDegree
@@ -361,26 +425,54 @@ function updateSpaceObject(so: SpaceObject, screen: Vec2d) {
     decayShots(so, screen)
 }
 
-
+let asteroids: SpaceObject[] = []
 const myShip: SpaceObject = createDefaultSpaceObject()
+myShip.name = 'ransed'
 
 function renderFrame (ctx: any) {
     drawSpaceObject(myShip, ctx)
+    for (let asteroid of asteroids) {
+        drawSpaceObject(asteroid, ctx)
+    }
 }
 
 function nextFrame (ctx: any) {
     const screen: Vec2d = {x: ctx.canvas.width, y: ctx.canvas.height}
-    spaceObjectKeyController(myShip)
 
+    spaceObjectKeyController(myShip)
     if (bounce) {
         bounceSpaceObject(myShip, screen)
     } else {
         wrapSpaceObject(myShip, screen)
     }
-
     friction(myShip, 0.998)
     updateSpaceObject(myShip, screen)
+
+
+    for (let asteroid of asteroids) {
+        if (bounce) {
+            bounceSpaceObject(asteroid, screen)
+        } else {
+            wrapSpaceObject(asteroid, screen)
+        }
+        updateSpaceObject(asteroid, screen)
+    }
+
 }
+
+function init() {
+    console.log('adds event listeners')
+    document.addEventListener('keydown', (event) => arrowControl(event, true));
+    document.addEventListener('keyup', (event) => arrowControl(event, false));
+    for (let i = 0; i<10; i++) {
+        let a: SpaceObject = createDefaultSpaceObject()
+        a.shape = Shape.Asteroid
+        asteroids.push(a)
+        // console.log(a)
+    }
+    console.log(asteroids)
+}
+
 
 const pic32lander = {renderFrame: renderFrame, nextFrame: nextFrame, init: init, round2dec: round2dec}
 
