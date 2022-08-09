@@ -6,17 +6,17 @@ body {
   color: #000;
   -webkit-font-smoothing: antialiased;
   margin: 0px;
-  background-color: #fff;
+  background-color: #cbd7da;
 }
 
 .Game2DCanvas {
-    width: 800px;
-    height: 600px;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    /* border: 10px dashed darkgoldenrod; */
-    /* border: 20px dashed #000; */
-    /* border: 5px solid pink; */
+  width: 800px;
+  height: 600px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  /* border: 10px dashed darkgoldenrod; */
+  /* border: 20px dashed #000; */
+  /* border: 5px solid pink; */
 }

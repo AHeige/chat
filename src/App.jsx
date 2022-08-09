@@ -1,10 +1,9 @@
 import React from "react"
 // import ChatPage from "./pages/chatPage"
-import MessageRenderer from "./ChatClient"
+import MainPage from "./pages/MainPage"
 
 const App = () => {
-//   return <ChatPage></ChatPage>
-  return <MessageRenderer></MessageRenderer>
+  return <MainPage />
 }
 
 export default App
