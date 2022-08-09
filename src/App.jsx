@@ -3,8 +3,8 @@ import React from "react"
 import MessageRenderer from "./ChatClient"
 
 const App = () => {
-//   return <ChatPage></ChatPage>
-  return <MessageRenderer></MessageRenderer>
+  //   return <ChatPage></ChatPage>
+  return <MessageRenderer />
 }
 
 export default App
