@@ -396,6 +396,11 @@ function applyEngine(so: SpaceObject): number {
 }
 
 function fire(so: SpaceObject) {
+  if (so.ammo < 1) {
+    console.log(so.name + ' is out of ammo')
+    return
+  }
+  so.ammo--
   let shot = createDefaultSpaceObject()
   shot.size = { x: rndi(2, 6), y: rndi(20, 50) }
   shot.color = randomGreen()
@@ -524,11 +529,13 @@ function handleCollisions(spaceObjects: SpaceObject[]) {
         if (isColliding(shot, so0)) {
           so0.health-=shot.damage
           so0.position = add(so0.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+          so0.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
           shot.health = 0
         }
         if (isColliding(shot, so1)) {
           so1.health-=shot.damage
           so1.position = add(so1.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+          so1.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
           shot.health = 0
         }
       }
@@ -542,15 +549,35 @@ function resetCollisions(spaceObjects: SpaceObject[]) {
   }
 }
 
+
 const numberOfAsteroids: number = 4
 let myShip: SpaceObject = createDefaultSpaceObject()
-myShip.name = "ransed"
-myShip.health = 60000
-myShip.missileSpeed = 50
-myShip.size = { x: 60, y: 120 }
-
 let allSpaceObjects: SpaceObject[] = []
-allSpaceObjects.push(myShip)
+
+function init(cid: number) {
+
+  myShip.name = "Player" + cid
+  myShip.health = 1000
+  myShip.missileSpeed = 20
+  myShip.ammo = 1000
+  myShip.size = { x: 50, y: 100 }
+
+  allSpaceObjects.push(myShip)
+
+
+  console.log("adds event listeners")
+  document.addEventListener("keydown", (event) => arrowControl(event, true))
+  document.addEventListener("keyup", (event) => arrowControl(event, false))
+  for (let i = 0; i < numberOfAsteroids; i++) {
+    let a: SpaceObject = createDefaultSpaceObject()
+    a.shape = Shape.Asteroid
+    a.name = "Asteroid #" + i
+    a.health = 3
+    allSpaceObjects.push(a)
+  }
+  console.log(allSpaceObjects)
+}
+
 
 function renderFrame(ctx: any) {
   for (let so of allSpaceObjects) {
@@ -577,18 +604,6 @@ function nextFrame(ctx: any) {
   }
 }
 
-function init() {
-  console.log("adds event listeners")
-  document.addEventListener("keydown", (event) => arrowControl(event, true))
-  document.addEventListener("keyup", (event) => arrowControl(event, false))
-  for (let i = 0; i < numberOfAsteroids; i++) {
-    let a: SpaceObject = createDefaultSpaceObject()
-    a.shape = Shape.Asteroid
-    a.name = "Asteroid #" + i
-    allSpaceObjects.push(a)
-  }
-  console.log(allSpaceObjects)
-}
 
 const pic32lander = {
   renderFrame: renderFrame,

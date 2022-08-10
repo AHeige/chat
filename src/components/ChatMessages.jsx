@@ -13,7 +13,7 @@ const ChatMessages = ({ messages }) => {
   return messages.map((obj, index) => (
     <Grid key={index} item style={{ marginTop: "0.3em", width: "fit-content" }}>
       <Card key={index}>
-        <CardHeader title={obj.message} />
+        <CardHeader title={(obj.srvAck ? '' : '*') + new Date(obj.rxDate).toLocaleTimeString('sv-SV') + ', ' + obj.user + ': ' + obj.text} />
       </Card>
     </Grid>
   ))
