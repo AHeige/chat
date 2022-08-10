@@ -10,7 +10,7 @@ import Chat from "../components/Chat"
 import Grid from "@mui/material/Grid"
 
 const MainPage = () => {
-  const [messages, updateMessages] = useState([])
+  const [messages, setMessages] = useState([])
   const [sock, setSock] = useState()
   const [clientId, setClientId] = useState(-1)
   const [socketLost, setSocketLost] = useState(false)
@@ -22,7 +22,7 @@ const MainPage = () => {
   }, [socketLost])
 
   useEffect(() => {
-    console.log('messages updated ', messages)
+    console.log("messages updated ", messages)
   }, [messages])
 
   const addEventListeners = (socket) => {
@@ -30,12 +30,12 @@ const MainPage = () => {
       let msgObj = JSON.parse(event.data)
       if (msgObj.initMessage) {
         setClientId(() => {
-            return msgObj.cid
+          return msgObj.cid
         })
       } else {
         msgObj.mid = messages.length
       }
-      removeAckMessages(msgObj)
+      removeAckMessage(msgObj)
       addMessage(msgObj)
     })
 
@@ -45,15 +45,15 @@ const MainPage = () => {
   }
 
   const addMessage = (message) => {
-    updateMessages(oldMessages => {
+    setMessages((oldMessages) => {
       return [...oldMessages, message]
     })
   }
 
-  const removeAckMessages = (msg) => {
-    updateMessages(oldMessages => {
+  const removeAckMessage = (msg) => {
+    setMessages((oldMessages) => {
       return oldMessages.filter((old) => {
-        return !(old.cid === msg.cid && old.mid ===  msg.srvAckMid)
+        return !(old.cid === msg.cid && old.mid === msg.srvAckMid)
       })
     })
   }
@@ -67,7 +67,7 @@ const MainPage = () => {
       }
 
       if (sock.readyState !== 1) {
-        setSocketLost(oldVal => !oldVal)
+        setSocketLost((oldVal) => !oldVal)
       }
 
       const messageObject = {
@@ -77,9 +77,9 @@ const MainPage = () => {
         srvAck: false,
         rxDate: new Date(),
         cid: clientId,
-        user: '(Me #' + clientId + ')'
+        user: "(Me #" + clientId + ")",
       }
-      
+
       addMessage(messageObject)
 
       const message = JSON.stringify(messageObject)
