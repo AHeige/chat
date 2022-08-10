@@ -22,6 +22,8 @@ const ChatInput = ({ sendMessage }) => {
         <BottomNavigation style={{ backgroundColor: "#CBD7DA" }}>
           <Box
             style={{
+              marginTop: "0.7em",
+              marginBottom: "0.7em",
               width: "50%",
               backgroundColor: "#D3D3D3",
               borderRadius: "25px",
