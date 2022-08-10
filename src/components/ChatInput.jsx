@@ -18,7 +18,7 @@ const ChatInput = ({ sendMessage }) => {
 
   return (
     <>
-      <Paper elevation={3} style={{ width: "100%" }}>
+      <Paper elevation={3}>
         <BottomNavigation style={{ backgroundColor: "#CBD7DA" }}>
           <Box
             style={{
@@ -26,7 +26,7 @@ const ChatInput = ({ sendMessage }) => {
               marginBottom: "0.7em",
               width: "50%",
               backgroundColor: "#fff",
-              borderRadius: "25px",
+              borderRadius: "20px",
             }}>
             <Input
               style={{

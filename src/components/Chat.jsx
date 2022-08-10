@@ -6,21 +6,20 @@ import ChatMessages from "./ChatMessages"
 
 //Material UI
 import Grid from "@mui/material/Grid"
+import Drawer from "@mui/material/Drawer"
 
 const Chat = ({ sendMessage, messages }) => {
   return (
-    <Grid
-      container
-      direction={"column"}
-      xs={12}
-      style={{ position: "fixed", bottom: "0" }}>
-      <Grid item xs={12}>
-        <ChatMessages messages={messages} />
+    <Drawer variant='permanent' anchor='right'>
+      <Grid container justifyContent={"flex-end"}>
+        <Grid item xs={12}>
+          <ChatMessages messages={messages} />
+        </Grid>
+        <Grid item xs={12}>
+          <ChatInput sendMessage={sendMessage} />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <ChatInput sendMessage={sendMessage} />
-      </Grid>
-    </Grid>
+    </Drawer>
   )
 }
 
