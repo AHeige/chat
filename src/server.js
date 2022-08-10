@@ -26,6 +26,13 @@ function getLowestAvailableCid() {
   return nextUserId
 }
 
+let nextServerUserId = 0
+
+function getLowestAvailableServerCid() {
+  nextServerUserId++
+  return nextServerUserId
+}
+
 function broadcastMessage(message, cidToSkip = -1) {
   if (connectedUsers.length < 1) {
     console.log ('No users connected')
@@ -41,25 +48,92 @@ function broadcastMessage(message, cidToSkip = -1) {
   console.log ('Number of connected users: ' + (connectedUsers.length))
 }
 
-function removeUser(cid) {
+function removeUser(scid) {
+  if (scid === false) {
+    console.error('CANNOT REMOVE USER "FALSE"')
+    return
+  }
   connectedUsers = connectedUsers.filter((user) => {
-    return user.cid !== cid
+    return user.scid !== scid
   })
+}
+
+function sendWelcomeMessage(ws, scid) {
+  ws.send(JSON.stringify({
+    rxDate: new Date(),
+    text: 'Welcome back ',
+    user: 'server v0.1.0',
+    srvAck: true,
+    initMessage: true,
+    scid: scid
+  }))
+}
+
+function sendCidRequestMessage(ws, cid, scid) {
+  ws.send(JSON.stringify({
+    rxDate: new Date(),
+    cidResponse: true,
+    cidOption: cid,
+    server: 'server v0.1.0',
+    text: 'Welcome! You got the name: Player ' + cid,
+    scid: scid,
+    user: 'server v0.1.0',
+    srvAck: true
+  }))
+}
+
+function addUser (cid, socket, scid) {
+  connectedUsers.forEach((c) => {
+    if (cid === c) {
+      console.error ('CID ALREADY EXISTS: ' + c)
+    }
+  })
+  connectedUsers.push({
+    joinedDate: new Date(),
+    name: 'User#' + cid,
+    cid: cid,
+    sock: socket,
+    scid: scid
+  })
+
+  broadcastMessage({
+    rxDate: new Date(),
+    srvAck: true,
+    user: 'User #' + cid,
+    text: '<joined the chat>',
+    cid: cid,
+    scid: scid
+  }, cid)
 }
 
 function init() {
   wss.on("connection", function connection(ws) {
 
-    const cid = getLowestAvailableCid()
+    let cid = false
+    const scid = getLowestAvailableServerCid()
 
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
-      parsedObject.rxDate = new Date()
-      parsedObject.srvAckMid = parsedObject.mid
-      parsedObject.srvAck = true
-      parsedObject.user = 'User #' + cid
-      parsedObject.cid = cid
-      broadcastMessage(parsedObject)
+
+      if (parsedObject.clientInit === true) {
+        cid = getLowestAvailableCid()
+        sendCidRequestMessage(ws, cid, scid)
+        addUser(cid, ws, scid)
+
+      } else if (parsedObject.haveCookieCid) {
+
+        cid = parsedObject.cid
+        console.log ('Add user with existing cid ' + parsedObject.cid)
+        addUser(parsedObject.cid, ws, scid)
+
+      } else {
+        cid = parsedObject.cid
+        parsedObject.rxDate = new Date()
+        parsedObject.srvAckMid = parsedObject.mid
+        parsedObject.srvAck = true
+        parsedObject.user = 'User #' + parsedObject.cid
+        broadcastMessage(parsedObject)
+      }
     })
 
     ws.addEventListener('close', (event) => {
@@ -68,41 +142,15 @@ function init() {
         srvAck: true,
         user: 'User #' + cid,
         text: '<Logged out>',
-        cid: cid
+        cid: cid,
+        scid: scid
       })
-      removeUser(cid)
-      console.log ('User #' + cid + ' left the chat')
+      removeUser(scid)
+      console.log ('User scid:' + scid + ' left the chat')
       console.log ({connectedUsers})
     })
 
-    connectedUsers.push({
-      joinedDate: new Date(),
-      name: 'User#' + cid,
-      cid: cid,
-      sock: ws,
-    })
-
-    console.log ('User #' + cid + ' joined the chat')
-    // send welcome message
-    ws.send(JSON.stringify({
-      rxDate: new Date(),
-      initMessage: true,
-      cid: cid,
-      srvAck: true,
-      text: 'Welcome User #' + cid,
-      connectedUsers: getListOfConnectedUsers(),
-      user: 'server v0.1.0'
-    }))
-
-    broadcastMessage({
-      rxDate: new Date(),
-      srvAck: true,
-      user: 'User #' + cid,
-      text: '<joined the chat>',
-      cid: cid
-    }, cid)
-
-
+    sendWelcomeMessage(ws)
 
   })
 
@@ -110,3 +158,4 @@ function init() {
 }
 
 init()
+

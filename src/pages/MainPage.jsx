@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import Cookies from 'js-cookie'
 
 //Pages
 import Game2D from "../components/Game2D"
@@ -25,18 +26,45 @@ const MainPage = () => {
     console.log("messages updated ", messages)
   }, [messages])
 
+  const getCidFromCookie = () => {
+    let cid = parseInt(Cookies.get('cid'))
+    if (isNaN(cid)) {
+      return false
+    }
+    return cid
+  }
+
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
-      if (msgObj.initMessage) {
+      if (msgObj.cidResponse) {
+        console.log ('cidResponse')
+        Cookies.set('cid', msgObj.cidOption, { expires: 2 })
         setClientId(() => {
-          return msgObj.cid
+          return getCidFromCookie()
         })
-      } else {
-        msgObj.mid = messages.length
       }
+
+      if (getCidFromCookie() === false) {
+        console.log ('clientInit')
+        sendWith(socket, {clientInit: true})
+        return
+      } else {
+        setClientId(() => {
+          return getCidFromCookie()
+        })
+      }
+
+      if (msgObj.initMessage) {
+        console.log ('initMessage')
+        msgObj.text = msgObj.text + ' Player ' + getCidFromCookie()
+        sendWith(socket, {cid: getCidFromCookie(), haveCookieCid: true})
+      }
+
+      msgObj.mid = messages.length
       removeAckMessage(msgObj)
       addMessage(msgObj)
+
     })
 
     socket.addEventListener("close", (event) => {
@@ -58,7 +86,24 @@ const MainPage = () => {
     })
   }
 
-  const sendMessage = (e) => {
+  const sendMessage = (messageObject) => {
+      sendWith(sock, messageObject)
+  }
+
+  const sendWith = (socket, messageObject) => {
+    if (!socket) {
+      console.error('socket is undefined')
+      return
+    }
+    if (socket.readyState === 1) {
+      socket.send(JSON.stringify(messageObject))
+    } else {
+      console.error("socket not open, readyState=" + socket.readyState)
+    }
+  }
+
+
+  const handleMessageSubmit = (e) => {
     if (e.key === "Enter") {
       const msg = e.target.value
 
@@ -81,13 +126,8 @@ const MainPage = () => {
       }
 
       addMessage(messageObject)
+      sendMessage(messageObject)
 
-      const message = JSON.stringify(messageObject)
-      if (sock && sock.readyState === 1) {
-        sock.send(message)
-      } else {
-        console.error("Socket not initialized, readyState=" + sock.readyState)
-      }
     }
   }
 
@@ -97,7 +137,7 @@ const MainPage = () => {
         <Game2D id='aster' cid={clientId}></Game2D>
       </Grid>
       <Grid item xs={12}>
-        <Chat messages={messages} sendMessage={sendMessage} />
+        <Chat messages={messages} sendMessage={handleMessageSubmit} />
       </Grid>
     </Grid>
   )
