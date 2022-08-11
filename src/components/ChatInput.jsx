@@ -18,16 +18,23 @@ const ChatInput = ({ sendMessage }) => {
 
   return (
     <>
-      <Paper elevation={3}>
-        <BottomNavigation style={{ backgroundColor: "#CBD7DA" }}>
+      <Paper
+        elevation={3}
+        style={{ position: "fixed", bottom: 0, width: "78%" }}
+      >
+        <BottomNavigation
+          style={{ backgroundColor: "#CBD7DA", justifyContent: "left" }}
+        >
           <Box
             style={{
               marginTop: "0.7em",
               marginBottom: "0.7em",
-              width: "50%",
+              marginLeft: "8em",
+              width: "20em",
               backgroundColor: "#fff",
               borderRadius: "20px",
-            }}>
+            }}
+          >
             <Input
               style={{
                 //backgroundColor: "#D3D3D3",
@@ -37,9 +44,10 @@ const ChatInput = ({ sendMessage }) => {
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
-              placeholder='Aa'
+              placeholder="Aa"
               disableUnderline={true}
-              inputRef={ref}></Input>
+              inputRef={ref}
+            ></Input>
           </Box>
         </BottomNavigation>
       </Paper>
