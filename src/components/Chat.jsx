@@ -17,7 +17,12 @@ const Chat = ({ sendMessage, messages }) => {
 
   return (
     <Drawer variant="permanent" anchor="right">
-      <Grid container xs={12} alignContent={"flex-end"}>
+      <Grid
+        container
+        xs={12}
+        alignContent={"flex-end"}
+        style={{ minWidth: "28em", marginBottom: "3.5em" }}
+      >
         <Grid item>
           <ChatMessages messages={messages} />
         </Grid>

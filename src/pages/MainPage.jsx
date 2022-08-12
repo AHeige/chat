@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie"
 
 //Pages
 import Game2D from "../components/Game2D"
@@ -27,7 +27,7 @@ const MainPage = () => {
   }, [messages])
 
   const getCidFromCookie = () => {
-    let cid = parseInt(Cookies.get('cid'))
+    let cid = parseInt(Cookies.get("cid"))
     if (isNaN(cid)) {
       return false
     }
@@ -38,16 +38,16 @@ const MainPage = () => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
       if (msgObj.cidResponse) {
-        console.log ('cidResponse')
-        Cookies.set('cid', msgObj.cidOption, { expires: 2 })
+        console.log("cidResponse")
+        Cookies.set("cid", msgObj.cidOption, { expires: 2 })
         setClientId(() => {
           return getCidFromCookie()
         })
       }
 
       if (getCidFromCookie() === false) {
-        console.log ('clientInit')
-        sendWith(socket, {clientInit: true})
+        console.log("clientInit")
+        sendWith(socket, { clientInit: true })
         return
       } else {
         setClientId(() => {
@@ -56,15 +56,14 @@ const MainPage = () => {
       }
 
       if (msgObj.initMessage) {
-        console.log ('initMessage')
-        msgObj.text = msgObj.text + ' Player ' + getCidFromCookie()
-        sendWith(socket, {cid: getCidFromCookie(), haveCookieCid: true})
+        console.log("initMessage")
+        msgObj.text = msgObj.text + " Player " + getCidFromCookie()
+        sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
       }
 
       msgObj.mid = messages.length
       removeAckMessage(msgObj)
       addMessage(msgObj)
-
     })
 
     socket.addEventListener("close", (event) => {
@@ -87,12 +86,12 @@ const MainPage = () => {
   }
 
   const sendMessage = (messageObject) => {
-      sendWith(sock, messageObject)
+    sendWith(sock, messageObject)
   }
 
   const sendWith = (socket, messageObject) => {
     if (!socket) {
-      console.error('socket is undefined')
+      console.error("socket is undefined")
       return
     }
     if (socket.readyState === 1) {
@@ -102,6 +101,20 @@ const MainPage = () => {
     }
   }
 
+  //Setting a random (1-5) color onto text
+  const textColor = {
+    1: "#FF0000", //Red
+    2: "#008000", //Green
+    3: "#0000FF", //Blue
+    4: "#800080", //Purple
+    5: "#800000", //Brown
+  }
+
+  const colorPicker = () => {
+    const number = Math.floor(Math.random() * 5) + 1
+    console.log(number)
+    return number
+  }
 
   const handleMessageSubmit = (e) => {
     if (e.key === "Enter") {
@@ -115,6 +128,8 @@ const MainPage = () => {
         setSocketLost((oldVal) => !oldVal)
       }
 
+      console.log(msg)
+
       const messageObject = {
         text: msg,
         type: 1,
@@ -123,18 +138,18 @@ const MainPage = () => {
         rxDate: new Date(),
         cid: clientId,
         user: "(Me #" + clientId + ")",
+        color: textColor[colorPicker()],
       }
 
       addMessage(messageObject)
       sendMessage(messageObject)
-
     }
   }
 
   return (
     <Grid container>
       <Grid item xs={12}>
-        <Game2D id='aster' cid={clientId}></Game2D>
+        <Game2D id="aster" cid={clientId}></Game2D>
       </Grid>
       <Grid item xs={12}>
         <Chat messages={messages} sendMessage={handleMessageSubmit} />

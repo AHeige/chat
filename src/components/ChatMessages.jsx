@@ -1,27 +1,23 @@
 import React from "react"
 
 //Material UI
-import Drawer from "@mui/material/Drawer"
-import Chip from "@mui/material/Chip"
 import Card from "@mui/material/Card"
-import CardHeader from "@mui/material/CardHeader"
-import CardMedia from "@mui/material/CardMedia"
 import CardContent from "@mui/material/CardContent"
-import CardActions from "@mui/material/CardActions"
 
 const ChatMessages = ({ messages }) => {
+  //To-Do
+  //Make it possible to change color of your text to what you like.
+
   return messages.map((obj, index) => (
-    <Card key={index}>
-      <CardHeader
-        title={
-          (obj.srvAck ? "" : "*") +
-          new Date(obj.rxDate).toLocaleTimeString("sv-SV") +
-          ", " +
-          obj.user +
-          ": " +
-          obj.text
-        }
-      />
+    <Card key={index} elevation={0}>
+      <CardContent style={{ fontSize: "1em" }}>
+        <span style={{ color: "#909090" }}>
+          {(obj.srvAck ? "" : "*") +
+            new Date(obj.rxDate).toLocaleTimeString("sv-SV")}{" "}
+        </span>
+        {obj.user + ": "}
+        <span style={{ color: obj.color }}>{obj.text}</span>
+      </CardContent>
     </Card>
   ))
 }

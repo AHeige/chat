@@ -5,6 +5,9 @@ import Paper from "@mui/material/Paper"
 import BottomNavigation from "@mui/material/BottomNavigation"
 import Box from "@mui/material/Box"
 import Input from "@mui/material/Input"
+import SendIcon from "@mui/icons-material/Send"
+import Button from "@mui/material/Button"
+import Stack from "@mui/material/Stack"
 
 const ChatInput = ({ sendMessage }) => {
   const ref = useRef(null)
@@ -14,6 +17,12 @@ const ChatInput = ({ sendMessage }) => {
       sendMessage(e)
       ref.current.value = ""
     }
+  }
+
+  const buttonSend = () => {
+    const m = ref.current.value
+
+    sendMessage(m)
   }
 
   return (
@@ -29,26 +38,36 @@ const ChatInput = ({ sendMessage }) => {
             style={{
               marginTop: "0.7em",
               marginBottom: "0.7em",
-              marginLeft: "8em",
-              width: "20em",
+              marginLeft: "1em",
+              marginRight: "1em",
+              width: "19.5em",
               backgroundColor: "#fff",
-              borderRadius: "20px",
+              //borderRadius: "20px",
             }}
           >
             <Input
               style={{
                 //backgroundColor: "#D3D3D3",
-                borderRadius: "5px",
+                //borderRadius: "5px",
                 width: "100%",
                 height: "100%",
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
-              placeholder="Aa"
+              placeholder="Send a message"
               disableUnderline={true}
               inputRef={ref}
             ></Input>
           </Box>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              endIcon={<SendIcon />}
+              onClick={() => buttonSend()}
+            >
+              Send
+            </Button>
+          </Stack>
         </BottomNavigation>
       </Paper>
     </>
