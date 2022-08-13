@@ -74,11 +74,19 @@ function degToRad(deg: number): number {
   return (deg * Math.PI) / 180
 }
 
+function radToDeg(rad: number): number {
+  return rad * (180/Math.PI)
+}
+
 function heading(so: SpaceObject): Vec2d {
   return {
     x: Math.cos(degToRad(so.angleDegree)),
     y: Math.sin(degToRad(so.angleDegree)),
   }
+}
+
+function alignHeadingToVelocity(so: SpaceObject) {
+  so.angleDegree = radToDeg(Math.atan2(so.velocity.y, so.velocity.x))
 }
 
 function isColliding(so0: SpaceObject, so1: SpaceObject): boolean {
@@ -102,18 +110,22 @@ function bounceSpaceObject(
   if (so.position.x < gap) {
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = gap
+    so.bounceCount++
   }
   if (so.position.x >= screen.x) {
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = screen.x - gap
+    so.bounceCount++
   }
   if (so.position.y < gap) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = gap
+    so.bounceCount++
   }
   if (so.position.y >= screen.y) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = screen.y - gap
+    so.bounceCount++
   }
 }
 
@@ -152,13 +164,17 @@ type SpaceObject = {
   colliding: boolean
   collidingWith: SpaceObject[]
   damage: number
+  armedDelay: number
+  bounceCount: number
+  didHit: boolean
+  shotBlowFrame: number
 }
 
 function createDefaultSpaceObject(): SpaceObject {
   let so: SpaceObject = {
     shape: Shape.Triangle,
     mass: 10,
-    size: { x: 40, y: 40 },
+    size: { x: 24, y: 24 },
     color: "#fff",
     position: { x: rndi(0, 1500), y: rndi(0, 1500) },
     velocity: { x: rndf(-4, 4), y: rndf(-4, 4) },
@@ -177,7 +193,11 @@ function createDefaultSpaceObject(): SpaceObject {
     shieldPower: 100,
     colliding: false,
     collidingWith: [],
-    damage: 0.5
+    damage: 5,
+    armedDelay: 3,
+    bounceCount: 0,
+    didHit: false,
+    shotBlowFrame: 6
   }
 
   return so
@@ -200,9 +220,9 @@ function drawAsteroid(so: SpaceObject, ctx: any) {
   ctx.save()
   ctx.translate(so.position.x, so.position.y)
   ctx.fillStyle = so.colliding === true ? "#f00" : so.color
-  ctx.font = "32px courier"
-  ctx.fillText(so.name, 100, -50)
-  ctx.fillText("health: " + so.health, 100, 0)
+  // ctx.font = "32px courier"
+  // ctx.fillText(so.name, 100, -50)
+  // ctx.fillText("health: " + so.health, 100, 0)
   // ctx.fillText(to_string(so.position), 100, 50)
   ctx.fillRect(-so.size.x / 2, -so.size.y / 2, so.size.x, so.size.y)
   ctx.restore()
@@ -247,7 +267,7 @@ function randomAnyColor(): string {
 
 function drawShot(so: SpaceObject, ctx: any) {
   for (let shot of so.shotsInFlight) {
-    ctx.fillStyle = shot.color
+    ctx.fillStyle = (shot.armedDelay < 0 ? shot.color : '#fff')
     ctx.save()
     ctx.translate(shot.position.x, shot.position.y)
     ctx.rotate(((90 + shot.angleDegree) * Math.PI) / 180)
@@ -272,7 +292,7 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   ctx.fillText(to_string(so.position), xtext, -100)
   ctx.fillText("sif: " + so.shotsInFlight.length, xtext, 0)
   ctx.fillText("ammo: " + so.ammo, xtext, 50)
-  ctx.fillText("health: " + so.health, xtext, 100)
+  ctx.fillText("health: " + round2dec(so.health, 1), xtext, 100)
   ctx.fillText("shield: " + so.shieldPower, xtext, 150)
   ctx.fillText("angle: " + Math.abs(so.angleDegree % 360), xtext, 200)
   ctx.rotate(((90 + so.angleDegree) * Math.PI) / 180)
@@ -289,9 +309,9 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   ctx.lineTo(0, (-so.size.y / 2) * scale)
 
   // canons
-  const cannonWidth: number = 20
-  const cannonStart: number = 0
-  const cannonEnd: number = 50
+  const cannonWidth: number = 10
+  const cannonStart: number = 15
+  const cannonEnd: number = 40
   ctx.moveTo(cannonWidth, cannonStart)
   ctx.lineTo(cannonWidth, -cannonEnd)
   ctx.moveTo(-cannonWidth, cannonStart)
@@ -304,13 +324,13 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   ctx.fill()
 
   // shield
-  ctx.beginPath()
-  ctx.lineWidth = 1
-  ctx.strokeStyle = "#66f"
-  ctx.arc(0, 0, 170, 0, Math.PI * 2)
-  ctx.stroke()
+  // ctx.beginPath()
+  // ctx.lineWidth = 1
+  // ctx.strokeStyle = "#66f"
+  // ctx.arc(0, 0, 170, 0, Math.PI * 2)
+  // ctx.stroke()
 
-  // ctx.lineWidth = 10;
+  // ctx.lineWidth = 3;
   // ctx.strokeStyle = (so.colliding ? '#f00' : so.color)
   // ctx.strokeRect(-so.size.x/2, -so.size.y/2, so.size.x, so.size.y)
 
@@ -402,12 +422,12 @@ function fire(so: SpaceObject) {
   }
   so.ammo--
   let shot = createDefaultSpaceObject()
-  shot.size = { x: rndi(2, 6), y: rndi(20, 50) }
+  shot.size = { x: rndi(3, 4), y: rndi(40, 50) }
   shot.color = randomGreen()
   let head: Vec2d = copy(so.position)
-  const aimError = 15
-  const headError = 2
-  const speedError = 10
+  const aimError = 10
+  const headError = 0.2
+  const speedError = 2.5
   head = add(head, scalarMultiply(heading(so), 15))
   head = add(head, {
     x: rndi(-aimError, aimError),
@@ -443,11 +463,35 @@ function decayDeadSpaceObjects(so: SpaceObject[]): SpaceObject[] {
     return out
 }
 
-function decayShots(so: SpaceObject, screen: Vec2d) {
+function decayOffScreenShots(so: SpaceObject, screen: Vec2d) {
     so.shotsInFlight = so.shotsInFlight.filter(function (e) {
         return !ofScreen(e.position, screen)
     })
-    so.shotsInFlight = decayDeadSpaceObjects(so.shotsInFlight)
+}
+
+function renderExplosionFrame(pos: Vec2d, ctx: any) {
+  let offset: number = 14
+  let minSize: number = 2
+  let maxSize: number = 30
+  ctx.save()
+  ctx.translate(pos.x, pos.y)
+  for (let c of ['#ff0', '#f00']) {
+    let center = add({x: 0, y: 0}, {x: rndi(-offset, offset), y : rndi(-offset, offset)})
+    let size = add({x: 0, y: 0}, {x: rndi(minSize, maxSize), y : rndi(minSize, maxSize)})
+    ctx.fillStyle = c
+    ctx.fillRect(center.x, center.y, size.x, size.y)
+  }
+  ctx.restore()
+}
+
+function decayDeadShots(so: SpaceObject) {
+  so.shotsInFlight = decayDeadSpaceObjects(so.shotsInFlight)
+}
+
+function removeShotsAfterBounces(so: SpaceObject, maxBounces: number) {
+  so.shotsInFlight = so.shotsInFlight.filter(function (e) {
+      return e.bounceCount <= maxBounces
+  })
 }
 
 
@@ -505,18 +549,35 @@ function spaceObjectKeyController(so: SpaceObject) {
   }
 }
 
-function updateSpaceObject(so: SpaceObject, screen: Vec2d) {
+function handleHittingShot(shot: SpaceObject, ctx: any) {
+  if (shot.didHit) {
+    shot.shotBlowFrame--
+    shot.velocity = scalarMultiply(shot.velocity, 0.3)
+    renderExplosionFrame(shot.position, ctx)
+    if (shot.shotBlowFrame < 0) {
+      shot.health = 0
+    }
+  }
+}
+
+function updateSpaceObject(so: SpaceObject, screen: Vec2d, ctx: any) {
   add(so.position, so.velocity)
   add(so.velocity, so.acceleration)
   for (let shot of so.shotsInFlight) {
     add(shot.position, shot.velocity)
     add(shot.velocity, shot.acceleration)
+    shot.armedDelay--
+    bounceSpaceObject(shot, screen)
+    alignHeadingToVelocity(shot)
+    handleHittingShot(shot, ctx)
   }
-  decayShots(so, screen)
+  // decayShots(so, screen)
+  decayDeadShots(so)
+  removeShotsAfterBounces(so, 5)
 }
 
 function handleCollisions(spaceObjects: SpaceObject[]) {
-  const vibration: number = 2
+  const vibration: number = 1
   for (let so0 of spaceObjects) {
     for (let so1 of spaceObjects) {
       if (isColliding(so0, so1) && so0.name !== so1.name) {
@@ -526,17 +587,19 @@ function handleCollisions(spaceObjects: SpaceObject[]) {
         so1.collidingWith.push(so0)
       }
       for (let shot of so0.shotsInFlight) {
-        if (isColliding(shot, so0)) {
-          so0.health-=shot.damage
-          so0.position = add(so0.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
-          so0.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
-          shot.health = 0
-        }
-        if (isColliding(shot, so1)) {
-          so1.health-=shot.damage
-          so1.position = add(so1.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
-          so1.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
-          shot.health = 0
+        if (shot.armedDelay < 0) {
+          if (isColliding(shot, so0) && shot.didHit === false) {
+            so0.health-=shot.damage
+            so0.position = add(so0.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+            so0.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
+            shot.didHit = true
+          }
+          if (isColliding(shot, so1) && shot.didHit === false) {
+            so1.health-=shot.damage
+            so1.position = add(so1.position, {x: rndi(-vibration, vibration), y: rndi(-vibration, vibration)})
+            so1.angleDegree = so0.angleDegree + rndi(-vibration, vibration)
+            shot.didHit = true
+          }
         }
       }
     }
@@ -546,21 +609,26 @@ function handleCollisions(spaceObjects: SpaceObject[]) {
 function resetCollisions(spaceObjects: SpaceObject[]) {
   for (let so of spaceObjects) {
     so.colliding = false
+    so.collidingWith = []
   }
 }
 
 
-const numberOfAsteroids: number = 4
+const numberOfAsteroids: number = 100
 let myShip: SpaceObject = createDefaultSpaceObject()
 let allSpaceObjects: SpaceObject[] = []
 
 function init(cid: number) {
 
   myShip.name = "Player" + cid
-  myShip.health = 1000
-  myShip.missileSpeed = 20
-  myShip.ammo = 1000
-  myShip.size = { x: 50, y: 100 }
+  myShip.health = 2000
+  myShip.fuel = 2000
+  myShip.ammo = 3000
+  myShip.missileSpeed = 38
+  myShip.size = { x: 40, y: 80 }
+  myShip.steeringPower = 1.2
+  myShip.enginePower = 0.09
+  myShip.color = '#fff'
 
   allSpaceObjects.push(myShip)
 
@@ -572,7 +640,7 @@ function init(cid: number) {
     let a: SpaceObject = createDefaultSpaceObject()
     a.shape = Shape.Asteroid
     a.name = "Asteroid #" + i
-    a.health = 3
+    a.health = 60
     allSpaceObjects.push(a)
   }
   console.log(allSpaceObjects)
@@ -588,6 +656,8 @@ function renderFrame(ctx: any) {
 
 function nextFrame(ctx: any) {
   const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  // const center: Vec2d = { x: ctx.canvas.width/2, y: ctx.canvas.height/2 }
+  // renderExplosionFrame(center, ctx)
 
   allSpaceObjects = decayDeadSpaceObjects(allSpaceObjects)
   handleCollisions(allSpaceObjects)
@@ -595,12 +665,12 @@ function nextFrame(ctx: any) {
 
   for (let so of allSpaceObjects) {
     if (bounce) {
-      bounceSpaceObject(so, screen, 0.3)
+      bounceSpaceObject(so, screen, 0.2)
     } else {
       wrapSpaceObject(so, screen)
     }
     friction(so, 0.992)
-    updateSpaceObject(so, screen)
+    updateSpaceObject(so, screen, ctx)
   }
 }
 

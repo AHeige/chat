@@ -37,6 +37,11 @@ const MainPage = () => {
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
+
+      if (msgObj.messageHistory) {
+        console.log ({messageHistory: msgObj.messageHistory})
+      }
+
       if (msgObj.cidResponse) {
         console.log("cidResponse")
         Cookies.set("cid", msgObj.cidOption, { expires: 2 })

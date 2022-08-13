@@ -3,6 +3,11 @@ const PORT = 8080
 const wss = new ws.WebSocketServer({
   port: PORT,
 })
+const app_version = require('../package.json').version
+const app_name = require('../package.json').name
+const server_name = app_name + '_server_' + app_version
+const host_version = process.version
+console.log (server_name + ' running on node ' + host_version)
 
 // some connected user did send a message. DateTime, UserID, message.
 // clients are a user with a UserID. OnMessageSent the client send a ws packet with messageData
@@ -33,7 +38,10 @@ function getLowestAvailableServerCid() {
   return nextServerUserId
 }
 
+let broadcastedMessagesList = []
+
 function broadcastMessage(message, cidToSkip = -1) {
+  broadcastedMessagesList.push(message)
   if (connectedUsers.length < 1) {
     console.log("No users connected")
   }
@@ -70,10 +78,11 @@ function sendWelcomeMessage(ws, scid) {
     JSON.stringify({
       rxDate: new Date(),
       text: "Welcome back ",
-      user: "server v0.1.0",
+      user: server_name,
       srvAck: true,
       initMessage: true,
       scid: scid,
+      messageHistory: broadcastedMessagesList
     })
   )
 }
@@ -97,12 +106,13 @@ function sendCidRequestMessage(ws, cid, scid) {
       rxDate: new Date(),
       cidResponse: true,
       cidOption: cid,
-      server: "server v0.1.0",
+      server: server_name,
       text: "Welcome! You got the name: Player " + cid,
       scid: scid,
-      user: "server v0.1.0",
+      user: server_name,
       srvAck: true,
       color: textColor[colorPicker],
+      messageHistory: broadcastedMessagesList
     })
   )
 }
@@ -127,6 +137,7 @@ function addUser(cid, socket, scid) {
       srvAck: true,
       user: "User #" + cid,
       text: "<joined the chat>",
+      userJoined: true,
       cid: cid,
       scid: scid,
     },
@@ -166,6 +177,7 @@ function init() {
         srvAck: true,
         user: "User #" + cid,
         text: "<Logged out>",
+        userLeft: true,
         cid: cid,
         scid: scid,
       })

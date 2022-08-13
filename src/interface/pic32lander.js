@@ -56,11 +56,17 @@ function wrapSpaceObject(so, screen) {
 function degToRad(deg) {
     return (deg * Math.PI) / 180;
 }
+function radToDeg(rad) {
+    return rad * (180 / Math.PI);
+}
 function heading(so) {
     return {
         x: Math.cos(degToRad(so.angleDegree)),
         y: Math.sin(degToRad(so.angleDegree)),
     };
+}
+function alignHeadingToVelocity(so) {
+    so.angleDegree = radToDeg(Math.atan2(so.velocity.y, so.velocity.x));
 }
 function isColliding(so0, so1) {
     if (so0.position.x < so1.position.x + so1.size.x &&
@@ -75,18 +81,22 @@ function bounceSpaceObject(so, screen, energyFactor = 1, gap = 1) {
     if (so.position.x < gap) {
         so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = gap;
+        so.bounceCount++;
     }
     if (so.position.x >= screen.x) {
         so.velocity.x = -so.velocity.x * energyFactor;
         so.position.x = screen.x - gap;
+        so.bounceCount++;
     }
     if (so.position.y < gap) {
         so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = gap;
+        so.bounceCount++;
     }
     if (so.position.y >= screen.y) {
         so.velocity.y = -so.velocity.y * energyFactor;
         so.position.y = screen.y - gap;
+        so.bounceCount++;
     }
 }
 function friction(so, friction) {
@@ -104,7 +114,7 @@ function createDefaultSpaceObject() {
     let so = {
         shape: Shape.Triangle,
         mass: 10,
-        size: { x: 40, y: 40 },
+        size: { x: 24, y: 24 },
         color: "#fff",
         position: { x: rndi(0, 1500), y: rndi(0, 1500) },
         velocity: { x: rndf(-4, 4), y: rndf(-4, 4) },
@@ -123,7 +133,11 @@ function createDefaultSpaceObject() {
         shieldPower: 100,
         colliding: false,
         collidingWith: [],
-        damage: 0.5
+        damage: 5,
+        armedDelay: 3,
+        bounceCount: 0,
+        didHit: false,
+        shotBlowFrame: 6
     };
     return so;
 }
@@ -143,9 +157,6 @@ function drawAsteroid(so, ctx) {
     ctx.save();
     ctx.translate(so.position.x, so.position.y);
     ctx.fillStyle = so.colliding === true ? "#f00" : so.color;
-    ctx.font = "32px courier";
-    ctx.fillText(so.name, 100, -50);
-    ctx.fillText("health: " + so.health, 100, 0);
     ctx.fillRect(-so.size.x / 2, -so.size.y / 2, so.size.x, so.size.y);
     ctx.restore();
 }
@@ -181,7 +192,7 @@ function randomAnyColor() {
 }
 function drawShot(so, ctx) {
     for (let shot of so.shotsInFlight) {
-        ctx.fillStyle = shot.color;
+        ctx.fillStyle = (shot.armedDelay < 0 ? shot.color : '#fff');
         ctx.save();
         ctx.translate(shot.position.x, shot.position.y);
         ctx.rotate(((90 + shot.angleDegree) * Math.PI) / 180);
@@ -207,7 +218,7 @@ function drawTriangleObject(so, ctx) {
     ctx.fillText(to_string(so.position), xtext, -100);
     ctx.fillText("sif: " + so.shotsInFlight.length, xtext, 0);
     ctx.fillText("ammo: " + so.ammo, xtext, 50);
-    ctx.fillText("health: " + so.health, xtext, 100);
+    ctx.fillText("health: " + round2dec(so.health, 1), xtext, 100);
     ctx.fillText("shield: " + so.shieldPower, xtext, 150);
     ctx.fillText("angle: " + Math.abs(so.angleDegree % 360), xtext, 200);
     ctx.rotate(((90 + so.angleDegree) * Math.PI) / 180);
@@ -220,9 +231,9 @@ function drawTriangleObject(so, ctx) {
     ctx.lineTo((-so.size.x / 4) * scale, (so.size.y / 4) * scale);
     ctx.lineTo((so.size.x / 4) * scale, (so.size.y / 4) * scale);
     ctx.lineTo(0, (-so.size.y / 2) * scale);
-    const cannonWidth = 20;
-    const cannonStart = 0;
-    const cannonEnd = 50;
+    const cannonWidth = 10;
+    const cannonStart = 15;
+    const cannonEnd = 40;
     ctx.moveTo(cannonWidth, cannonStart);
     ctx.lineTo(cannonWidth, -cannonEnd);
     ctx.moveTo(-cannonWidth, cannonStart);
@@ -231,11 +242,6 @@ function drawTriangleObject(so, ctx) {
     ctx.beginPath();
     ctx.arc(0, 20, 16, 0, Math.PI * 2);
     ctx.fill();
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#66f";
-    ctx.arc(0, 0, 170, 0, Math.PI * 2);
-    ctx.stroke();
     ctx.restore();
     drawShot(so, ctx);
 }
@@ -311,12 +317,12 @@ function fire(so) {
     }
     so.ammo--;
     let shot = createDefaultSpaceObject();
-    shot.size = { x: rndi(2, 6), y: rndi(20, 50) };
+    shot.size = { x: rndi(3, 4), y: rndi(40, 50) };
     shot.color = randomGreen();
     let head = copy(so.position);
-    const aimError = 15;
-    const headError = 2;
-    const speedError = 10;
+    const aimError = 10;
+    const headError = 0.2;
+    const speedError = 2.5;
     head = add(head, scalarMultiply(heading(so), 15));
     head = add(head, {
         x: rndi(-aimError, aimError),
@@ -348,11 +354,32 @@ function decayDeadSpaceObjects(so) {
     });
     return out;
 }
-function decayShots(so, screen) {
+function decayOffScreenShots(so, screen) {
     so.shotsInFlight = so.shotsInFlight.filter(function (e) {
         return !ofScreen(e.position, screen);
     });
+}
+function renderExplosionFrame(pos, ctx) {
+    let offset = 14;
+    let minSize = 2;
+    let maxSize = 30;
+    ctx.save();
+    ctx.translate(pos.x, pos.y);
+    for (let c of ['#ff0', '#f00']) {
+        let center = add({ x: 0, y: 0 }, { x: rndi(-offset, offset), y: rndi(-offset, offset) });
+        let size = add({ x: 0, y: 0 }, { x: rndi(minSize, maxSize), y: rndi(minSize, maxSize) });
+        ctx.fillStyle = c;
+        ctx.fillRect(center.x, center.y, size.x, size.y);
+    }
+    ctx.restore();
+}
+function decayDeadShots(so) {
     so.shotsInFlight = decayDeadSpaceObjects(so.shotsInFlight);
+}
+function removeShotsAfterBounces(so, maxBounces) {
+    so.shotsInFlight = so.shotsInFlight.filter(function (e) {
+        return e.bounceCount <= maxBounces;
+    });
 }
 function applySteer(so) {
     return so.steeringPower;
@@ -400,17 +427,32 @@ function spaceObjectKeyController(so) {
         fire(so);
     }
 }
-function updateSpaceObject(so, screen) {
+function handleHittingShot(shot, ctx) {
+    if (shot.didHit) {
+        shot.shotBlowFrame--;
+        shot.velocity = scalarMultiply(shot.velocity, 0.3);
+        renderExplosionFrame(shot.position, ctx);
+        if (shot.shotBlowFrame < 0) {
+            shot.health = 0;
+        }
+    }
+}
+function updateSpaceObject(so, screen, ctx) {
     add(so.position, so.velocity);
     add(so.velocity, so.acceleration);
     for (let shot of so.shotsInFlight) {
         add(shot.position, shot.velocity);
         add(shot.velocity, shot.acceleration);
+        shot.armedDelay--;
+        bounceSpaceObject(shot, screen);
+        alignHeadingToVelocity(shot);
+        handleHittingShot(shot, ctx);
     }
-    decayShots(so, screen);
+    decayDeadShots(so);
+    removeShotsAfterBounces(so, 5);
 }
 function handleCollisions(spaceObjects) {
-    const vibration = 2;
+    const vibration = 1;
     for (let so0 of spaceObjects) {
         for (let so1 of spaceObjects) {
             if (isColliding(so0, so1) && so0.name !== so1.name) {
@@ -420,17 +462,19 @@ function handleCollisions(spaceObjects) {
                 so1.collidingWith.push(so0);
             }
             for (let shot of so0.shotsInFlight) {
-                if (isColliding(shot, so0)) {
-                    so0.health -= shot.damage;
-                    so0.position = add(so0.position, { x: rndi(-vibration, vibration), y: rndi(-vibration, vibration) });
-                    so0.angleDegree = so0.angleDegree + rndi(-vibration, vibration);
-                    shot.health = 0;
-                }
-                if (isColliding(shot, so1)) {
-                    so1.health -= shot.damage;
-                    so1.position = add(so1.position, { x: rndi(-vibration, vibration), y: rndi(-vibration, vibration) });
-                    so1.angleDegree = so0.angleDegree + rndi(-vibration, vibration);
-                    shot.health = 0;
+                if (shot.armedDelay < 0) {
+                    if (isColliding(shot, so0) && shot.didHit === false) {
+                        so0.health -= shot.damage;
+                        so0.position = add(so0.position, { x: rndi(-vibration, vibration), y: rndi(-vibration, vibration) });
+                        so0.angleDegree = so0.angleDegree + rndi(-vibration, vibration);
+                        shot.didHit = true;
+                    }
+                    if (isColliding(shot, so1) && shot.didHit === false) {
+                        so1.health -= shot.damage;
+                        so1.position = add(so1.position, { x: rndi(-vibration, vibration), y: rndi(-vibration, vibration) });
+                        so1.angleDegree = so0.angleDegree + rndi(-vibration, vibration);
+                        shot.didHit = true;
+                    }
                 }
             }
         }
@@ -439,17 +483,22 @@ function handleCollisions(spaceObjects) {
 function resetCollisions(spaceObjects) {
     for (let so of spaceObjects) {
         so.colliding = false;
+        so.collidingWith = [];
     }
 }
-const numberOfAsteroids = 4;
+const numberOfAsteroids = 100;
 let myShip = createDefaultSpaceObject();
 let allSpaceObjects = [];
 function init(cid) {
     myShip.name = "Player" + cid;
-    myShip.health = 1000;
-    myShip.missileSpeed = 20;
-    myShip.ammo = 1000;
-    myShip.size = { x: 50, y: 100 };
+    myShip.health = 2000;
+    myShip.fuel = 2000;
+    myShip.ammo = 3000;
+    myShip.missileSpeed = 38;
+    myShip.size = { x: 40, y: 80 };
+    myShip.steeringPower = 1.2;
+    myShip.enginePower = 0.09;
+    myShip.color = '#fff';
     allSpaceObjects.push(myShip);
     console.log("adds event listeners");
     document.addEventListener("keydown", (event) => arrowControl(event, true));
@@ -458,7 +507,7 @@ function init(cid) {
         let a = createDefaultSpaceObject();
         a.shape = Shape.Asteroid;
         a.name = "Asteroid #" + i;
-        a.health = 3;
+        a.health = 60;
         allSpaceObjects.push(a);
     }
     console.log(allSpaceObjects);
@@ -476,13 +525,13 @@ function nextFrame(ctx) {
     spaceObjectKeyController(myShip);
     for (let so of allSpaceObjects) {
         if (bounce) {
-            bounceSpaceObject(so, screen, 0.3);
+            bounceSpaceObject(so, screen, 0.2);
         }
         else {
             wrapSpaceObject(so, screen);
         }
         friction(so, 0.992);
-        updateSpaceObject(so, screen);
+        updateSpaceObject(so, screen, ctx);
     }
 }
 const pic32lander = {
