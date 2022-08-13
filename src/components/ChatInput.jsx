@@ -63,7 +63,11 @@ const ChatInput = ({ sendMessage }) => {
               inputRef={ref}
             ></Input>
           </Box>
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction="row"
+            spacing={2}
+            style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
+          >
             <Button
               variant="contained"
               endIcon={<SendIcon />}

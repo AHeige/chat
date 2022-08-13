@@ -9,12 +9,18 @@ import Chat from "../components/Chat"
 
 //Material UI
 import Grid from "@mui/material/Grid"
+import WestIcon from "@mui/icons-material/West"
+import CommentIcon from "@mui/icons-material/Comment"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
+import AppBar from "@mui/material/AppBar"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
   const [sock, setSock] = useState()
   const [clientId, setClientId] = useState(-1)
   const [socketLost, setSocketLost] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080")
@@ -37,11 +43,6 @@ const MainPage = () => {
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
-
-      if (msgObj.messageHistory) {
-        console.log ({messageHistory: msgObj.messageHistory})
-      }
-
       if (msgObj.cidResponse) {
         console.log("cidResponse")
         Cookies.set("cid", msgObj.cidOption, { expires: 2 })
@@ -148,14 +149,35 @@ const MainPage = () => {
   }
 
   return (
-    <Grid container>
-      <Grid item xs={12}>
-        <Game2D id="aster" cid={clientId}></Game2D>
+    <>
+      <AppBar style={{ alignItems: "end" }} color="inherit" elevation={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<CommentIcon />}
+            endIcon={<WestIcon />}
+            onClick={() => setIsOpen(true)}
+          ></Button>
+        </Stack>
+      </AppBar>
+      <Grid container>
+        <Grid item xs={12}>
+          <Game2D id="aster" cid={clientId}></Game2D>
+        </Grid>
+        <Grid item xs={12}>
+          <Chat
+            messages={messages}
+            sendMessage={handleMessageSubmit}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <Chat messages={messages} sendMessage={handleMessageSubmit} />
-      </Grid>
-    </Grid>
+    </>
   )
 }
 
