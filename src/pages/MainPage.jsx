@@ -116,34 +116,30 @@ const MainPage = () => {
     return number
   }
 
-  const handleMessageSubmit = (e) => {
-    if (e.key === "Enter") {
-      const msg = e.target.value
-
-      if (!msg) {
-        return
-      }
-
-      if (sock.readyState !== 1) {
-        setSocketLost((oldVal) => !oldVal)
-      }
-
-      console.log(msg)
-
-      const messageObject = {
-        text: msg,
-        type: 1,
-        mid: messages.length,
-        srvAck: false,
-        rxDate: new Date(),
-        cid: clientId,
-        user: "(Me #" + clientId + ")",
-        color: textColor[colorPicker()],
-      }
-
-      addMessage(messageObject)
-      sendMessage(messageObject)
+  const handleMessageSubmit = (message) => {
+    if (!message) {
+      return
     }
+
+    if (sock.readyState !== 1) {
+      setSocketLost((oldVal) => !oldVal)
+    }
+
+    console.log(message)
+
+    const messageObject = {
+      text: message,
+      type: 1,
+      mid: messages.length,
+      srvAck: false,
+      rxDate: new Date(),
+      cid: clientId,
+      user: "(Me #" + clientId + ")",
+      color: textColor[colorPicker()],
+    }
+
+    addMessage(messageObject)
+    sendMessage(messageObject)
   }
 
   return (

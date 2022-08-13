@@ -14,15 +14,19 @@ const ChatInput = ({ sendMessage }) => {
 
   const handleSendMessage = (e) => {
     if (e.key === "Enter") {
-      sendMessage(e)
-      ref.current.value = ""
+      sendMessage(ref.current.value)
+      cleanInput()
     }
   }
 
   const buttonSend = () => {
     const m = ref.current.value
-
     sendMessage(m)
+    cleanInput()
+  }
+
+  const cleanInput = () => {
+    ref.current.value = ""
   }
 
   return (
