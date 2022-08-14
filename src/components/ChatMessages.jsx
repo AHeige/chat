@@ -11,7 +11,7 @@ const ChatMessages = ({ messages }) => {
   return messages.map((obj, index) => (
     <Card key={index} elevation={0}>
       <CardContent style={{ fontSize: "1em" }}>
-        {(obj.userJoined || obj.userLeft || obj.initMessage) && (
+        {(obj.userJoined || obj.userLeft || obj.initMessage || obj.cidResponse) && (
           <>
             <span
               style={{
@@ -27,7 +27,7 @@ const ChatMessages = ({ messages }) => {
           </>
         )}
 
-        {!(obj.userJoined || obj.userLeft || obj.initMessage) && (
+        {!(obj.userJoined || obj.userLeft || obj.initMessage || obj.cidResponse) && (
           <>
             <span style={{ color: "#909090" }}>
               {(obj.srvAck ? "" : "*") +
