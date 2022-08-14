@@ -49,6 +49,10 @@ const MainPage = () => {
         setClientId(() => {
           return getCidFromCookie()
         })
+
+        msgObj.messageHistory.forEach(msg => {
+          addMessage(msg)
+        });
       }
 
       if (getCidFromCookie() === false) {
@@ -62,6 +66,9 @@ const MainPage = () => {
       }
 
       if (msgObj.initMessage) {
+        msgObj.messageHistory.forEach(msg => {
+          addMessage(msg)
+        });
         console.log("initMessage")
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
         sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
@@ -141,6 +148,7 @@ const MainPage = () => {
       rxDate: new Date(),
       cid: clientId,
       user: "(Me #" + clientId + ")",
+      thisIsMe: true,
       color: textColor[colorPicker()],
     }
 
