@@ -22,6 +22,7 @@ type Vec2d = {
   y: number
 }
 
+// refactor all vector ops to only return results and not change the arguments
 function add(to: Vec2d, from: Vec2d): Vec2d {
   to.x += from.x
   to.y += from.y
@@ -32,6 +33,13 @@ function addc(to: Vec2d, from: Vec2d): Vec2d {
   let tmp = copy(to)
   tmp.x += from.x
   tmp.y += from.y
+  return tmp
+}
+
+function sub(to: Vec2d, from: Vec2d): Vec2d {
+  let tmp = copy(to)
+  tmp.x -= from.x
+  tmp.y -= from.y
   return tmp
 }
 
@@ -56,6 +64,10 @@ function scalarMultiply(v: Vec2d, s: number): Vec2d {
   v.x *= s
   v.y *= s
   return v
+}
+
+function magnitude(v: Vec2d): number {
+  return Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2))
 }
 
 function wrap(p: Vec2d, screen: Vec2d) {
@@ -150,6 +162,15 @@ function bounceSpaceObject(
   }
 }
 
+function gravity(so1: SpaceObject, so2: SpaceObject, G: number, mul: number) {
+  const m1: number = so1.mass
+  const m2: number = so2.mass
+  const r: number = magnitude(sub(so1.position, so2.position))
+  const r2: number = Math.pow(r, 2)
+  const F: number = G * ((m1*m2)/r2)
+
+} 
+
 function friction(so: SpaceObject, friction: number) {
   scalarMultiply(so.velocity, friction)
 }
@@ -183,7 +204,8 @@ type SpaceObject = {
   missileDamage: number
   canonCoolDown: number
   canonOverHeat: boolean
-  canonHeatConstant: number
+  canonHeatAddedPerShot: number
+  canonCoolDownSpeed: number
   shieldPower: number
   colliding: boolean
   collidingWith: SpaceObject[]
@@ -199,7 +221,7 @@ function createDefaultSpaceObject(): SpaceObject {
   let maxSpeed = 1
   let so: SpaceObject = {
     shape: Shape.Triangle,
-    mass: 10,
+    mass: 1,
     size: { x: 24, y: 24 },
     color: "#fff",
     position: { x: rndi(0, 1000), y: rndi(0, 900) },
@@ -218,7 +240,8 @@ function createDefaultSpaceObject(): SpaceObject {
     missileDamage: 10,
     canonCoolDown: 0,
     canonOverHeat: false,
-    canonHeatConstant: 25,
+    canonHeatAddedPerShot: 25,
+    canonCoolDownSpeed: 8,
     shieldPower: 100,
     colliding: false,
     collidingWith: [],
@@ -476,7 +499,7 @@ function fire(so: SpaceObject) {
   if (so.canonOverHeat) {
     return
   }
-  so.canonCoolDown+=so.canonHeatConstant
+  so.canonCoolDown+=so.canonHeatAddedPerShot
   so.ammo--
   let shot = createDefaultSpaceObject()
   shot.damage = so.missileDamage
@@ -642,7 +665,7 @@ function coolDown(so: SpaceObject) {
     so.canonOverHeat = true
   }
 
-  so.canonCoolDown-=8
+  so.canonCoolDown-=so.canonCoolDownSpeed
   if (so.canonCoolDown < 1) {
     so.canonCoolDown = 0
     so.canonOverHeat = false
@@ -717,11 +740,12 @@ function init(cid: number) {
   myShip.name = "Player" + cid
   myShip.shape = Shape.Ship
   myShip.health = 9000
-  myShip.fuel = 270
-  myShip.ammo = 90
-  myShip.missileSpeed = 31
+  myShip.fuel = 300
+  myShip.ammo = 1000
+  myShip.missileSpeed = 30
   myShip.missileDamage = 6000
-  myShip.canonHeatConstant = 100
+  myShip.canonHeatAddedPerShot = 100
+  myShip.canonCoolDownSpeed = 9
   myShip.size = { x: 50, y: 50 }
   myShip.steeringPower = 1.12
   myShip.enginePower = 0.063

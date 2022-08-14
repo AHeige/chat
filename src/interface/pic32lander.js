@@ -149,7 +149,8 @@ function createDefaultSpaceObject() {
         missileDamage: 10,
         canonCoolDown: 0,
         canonOverHeat: false,
-        canonHeatConstant: 25,
+        canonHeatAddedPerShot: 25,
+        canonCoolDownSpeed: 8,
         shieldPower: 100,
         colliding: false,
         collidingWith: [],
@@ -356,7 +357,7 @@ function fire(so) {
     if (so.canonOverHeat) {
         return;
     }
-    so.canonCoolDown += so.canonHeatConstant;
+    so.canonCoolDown += so.canonHeatAddedPerShot;
     so.ammo--;
     let shot = createDefaultSpaceObject();
     shot.damage = so.missileDamage;
@@ -500,7 +501,7 @@ function coolDown(so) {
     if (so.canonCoolDown >= 100) {
         so.canonOverHeat = true;
     }
-    so.canonCoolDown -= 8;
+    so.canonCoolDown -= so.canonCoolDownSpeed;
     if (so.canonCoolDown < 1) {
         so.canonCoolDown = 0;
         so.canonOverHeat = false;
@@ -567,11 +568,12 @@ function init(cid) {
     myShip.name = "Player" + cid;
     myShip.shape = Shape.Ship;
     myShip.health = 9000;
-    myShip.fuel = 270;
-    myShip.ammo = 90;
-    myShip.missileSpeed = 31;
+    myShip.fuel = 300;
+    myShip.ammo = 1000;
+    myShip.missileSpeed = 30;
     myShip.missileDamage = 6000;
-    myShip.canonHeatConstant = 100;
+    myShip.canonHeatAddedPerShot = 100;
+    myShip.canonCoolDownSpeed = 9;
     myShip.size = { x: 50, y: 50 };
     myShip.steeringPower = 1.12;
     myShip.enginePower = 0.063;
