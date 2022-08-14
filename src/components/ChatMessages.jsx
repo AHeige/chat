@@ -11,12 +11,32 @@ const ChatMessages = ({ messages }) => {
   return messages.map((obj, index) => (
     <Card key={index} elevation={0}>
       <CardContent style={{ fontSize: "1em" }}>
-        <span style={{ color: "#909090" }}>
-          {(obj.srvAck ? "" : "*") +
-            new Date(obj.rxDate).toLocaleTimeString("sv-SV")}{" "}
-        </span>
-        {obj.user + ": "}
-        <span style={{ color: obj.color }}>{obj.text}</span>
+        {(obj.userJoined || obj.userLeft || obj.initMessage) && (
+          <>
+            <span
+              style={{
+                color: "#909090",
+                fontStyle: "italic",
+                fontSize: "0.9em",
+              }}>
+              {(obj.srvAck ? "" : "*") +
+                new Date(obj.rxDate).toLocaleTimeString("sv-SV")}{" "}
+              {obj.user + " "}
+              {obj.text}
+            </span>
+          </>
+        )}
+
+        {!(obj.userJoined || obj.userLeft || obj.initMessage) && (
+          <>
+            <span style={{ color: "#909090" }}>
+              {(obj.srvAck ? "" : "*") +
+                new Date(obj.rxDate).toLocaleTimeString("sv-SV")}{" "}
+            </span>
+            {obj.user + ": "}
+            <span style={{ color: obj.color }}>{obj.text}</span>
+          </>
+        )}
       </CardContent>
     </Card>
   ))
