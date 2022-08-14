@@ -76,6 +76,7 @@ function removeUser(scid) {
 function sendWelcomeMessage(ws, scid) {
   ws.send(
     JSON.stringify({
+      systemMessage: true,
       rxDate: new Date(),
       text: "Welcome back ",
       user: server_name,
@@ -103,6 +104,7 @@ const colorPicker = () => {
 function sendCidRequestMessage(ws, cid, scid) {
   ws.send(
     JSON.stringify({
+      systemMessage: true,
       rxDate: new Date(),
       cidResponse: true,
       cidOption: cid,
@@ -124,6 +126,7 @@ function addUser(cid, socket, scid) {
     }
   })
   connectedUsers.push({
+    systemMessage: true,
     joinedDate: new Date(),
     name: "User#" + cid,
     cid: cid,
@@ -133,6 +136,7 @@ function addUser(cid, socket, scid) {
 
   broadcastMessage(
     {
+      systemMessage: true,
       rxDate: new Date(),
       srvAck: true,
       user: "User #" + cid,
@@ -173,6 +177,7 @@ function init() {
 
     ws.addEventListener("close", (event) => {
       broadcastMessage({
+        systemMessage: true,
         rxDate: new Date(),
         srvAck: true,
         user: "User #" + cid,

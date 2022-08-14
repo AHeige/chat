@@ -12,15 +12,15 @@ import Button from "@mui/material/Button"
 import EastIcon from "@mui/icons-material/East"
 import CommentIcon from "@mui/icons-material/Comment"
 
-const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
+const Chat = ({sendMessage, messages, isOpen, setIsOpen}) => {
   const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages, isOpen])
 
   return (
-    <Drawer variant="persistant" anchor="right" open={isOpen} hideBackdrop>
+    <Drawer anchor="right" open={isOpen} hideBackdrop>
       <Stack
         direction="row"
         spacing={2}
@@ -39,7 +39,6 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
       </Stack>
       <Grid
         container
-        xs={12}
         alignContent={"flex-end"}
         style={{ minWidth: "28em", marginBottom: "3.5em" }}
       >
