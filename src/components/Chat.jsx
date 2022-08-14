@@ -20,7 +20,7 @@ const Chat = ({sendMessage, messages, isOpen, setIsOpen}) => {
   }, [messages, isOpen])
 
   return (
-    <Drawer anchor="right" open={isOpen} hideBackdrop>
+    <Drawer variant="persistent" anchor="right" open={isOpen} hideBackdrop>
       <Stack
         direction="row"
         spacing={2}
