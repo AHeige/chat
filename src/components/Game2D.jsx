@@ -4,11 +4,11 @@ import pic32lander from "../interface/pic32lander"
 
 function renderFps(ctx, frameTime) {
   ctx.fillStyle = "#fff"
-  ctx.font = "50px courier"
+  ctx.font = "24px courier"
   ctx.fillText(
     "FPS: " + pic32lander.round2dec(1 / (frameTime / 1000), 3),
-    30,
-    60
+    25,
+    40
   )
 }
 

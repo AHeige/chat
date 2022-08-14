@@ -28,6 +28,13 @@ function add(to: Vec2d, from: Vec2d): Vec2d {
   return to
 }
 
+function addc(to: Vec2d, from: Vec2d): Vec2d {
+  let tmp = copy(to)
+  tmp.x += from.x
+  tmp.y += from.y
+  return tmp
+}
+
 function copy_(to: Vec2d, from: Vec2d): Vec2d {
   to.x = from.x
   to.y = from.y
@@ -85,6 +92,13 @@ function heading(so: SpaceObject): Vec2d {
   }
 }
 
+function headingFromAngle(angleDegree: number): Vec2d {
+  return {
+    x: Math.cos(degToRad(angleDegree)),
+    y: Math.sin(degToRad(angleDegree)),
+  }
+}
+
 function alignHeadingToVelocity(so: SpaceObject) {
   so.angleDegree = radToDeg(Math.atan2(so.velocity.y, so.velocity.x))
 }
@@ -111,21 +125,28 @@ function bounceSpaceObject(
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = gap
     so.bounceCount++
+    so.damage = so.damage*0.1
   }
   if (so.position.x >= screen.x) {
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = screen.x - gap
     so.bounceCount++
+    so.damage = so.damage*0.1
+
   }
   if (so.position.y < gap) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = gap
     so.bounceCount++
+    so.damage = so.damage*0.1
+
   }
   if (so.position.y >= screen.y) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = screen.y - gap
     so.bounceCount++
+    so.damage = so.damage*0.1
+
   }
 }
 
@@ -159,7 +180,10 @@ type SpaceObject = {
   ammo: number
   shotsInFlight: SpaceObject[]
   missileSpeed: number
+  missileDamage: number
   canonCoolDown: number
+  canonOverHeat: boolean
+  canonHeatConstant: number
   shieldPower: number
   colliding: boolean
   collidingWith: SpaceObject[]
@@ -168,16 +192,18 @@ type SpaceObject = {
   bounceCount: number
   didHit: boolean
   shotBlowFrame: number
+  afterBurnerEnabled: boolean
 }
 
 function createDefaultSpaceObject(): SpaceObject {
+  let maxSpeed = 1
   let so: SpaceObject = {
     shape: Shape.Triangle,
     mass: 10,
     size: { x: 24, y: 24 },
     color: "#fff",
-    position: { x: rndi(0, 1500), y: rndi(0, 1500) },
-    velocity: { x: rndf(-4, 4), y: rndf(-4, 4) },
+    position: { x: rndi(0, 1000), y: rndi(0, 900) },
+    velocity: { x: rndf(-maxSpeed, maxSpeed), y: rndf(-maxSpeed, maxSpeed) },
     acceleration: { x: 0, y: 0 },
     name: "SpaceObject",
     angleDegree: 0,
@@ -189,15 +215,19 @@ function createDefaultSpaceObject(): SpaceObject {
     ammo: 10,
     shotsInFlight: [],
     missileSpeed: 5, // 30
+    missileDamage: 10,
     canonCoolDown: 0,
+    canonOverHeat: false,
+    canonHeatConstant: 25,
     shieldPower: 100,
     colliding: false,
     collidingWith: [],
     damage: 5,
-    armedDelay: 3,
+    armedDelay: 1,
     bounceCount: 0,
     didHit: false,
-    shotBlowFrame: 6
+    shotBlowFrame: 8,
+    afterBurnerEnabled: false
   }
 
   return so
@@ -205,8 +235,8 @@ function createDefaultSpaceObject(): SpaceObject {
 
 function drawSpaceObject(so: SpaceObject, ctx: any) {
   switch (so.shape) {
-    case Shape.Triangle:
-      drawTriangleObject(so, ctx)
+    case Shape.Ship:
+      drawShip(so, ctx)
       break
     case Shape.Asteroid:
       drawAsteroid(so, ctx)
@@ -267,21 +297,34 @@ function randomAnyColor(): string {
 
 function drawShot(so: SpaceObject, ctx: any) {
   for (let shot of so.shotsInFlight) {
-    ctx.fillStyle = (shot.armedDelay < 0 ? shot.color : '#fff')
+    if (shot.didHit) continue
+    if (Math.random() > 0.990) {
+      ctx.fillStyle = (shot.armedDelay < 0 ? '#00f' : '#fff')
+    } else if (Math.random() > 0.985) {
+      ctx.fillStyle = (shot.armedDelay < 0 ? '#ff0' : '#fff')
+    } else if (Math.random() > 0.975) {
+      ctx.fillStyle = (shot.armedDelay < 0 ? '#f00' : '#fff')
+    } else {
+      ctx.fillStyle = (shot.armedDelay < 0 ? shot.color : '#fff')
+    }
     ctx.save()
     ctx.translate(shot.position.x, shot.position.y)
     ctx.rotate(((90 + shot.angleDegree) * Math.PI) / 180)
     ctx.fillRect(-shot.size.x / 2, -shot.size.y / 2, shot.size.x, shot.size.y)
+    // ctx.beginPath()
+    // ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+    // ctx.fill()
     ctx.restore()
   }
 }
 
-function drawTriangleObject(so: SpaceObject, ctx: any) {
+function drawShip(so: SpaceObject, ctx: any) {
   let scale: number = 2
+  let shipSize = {x: 40, y: 80}
   ctx.save()
   ctx.translate(so.position.x, so.position.y)
   ctx.fillStyle = "#fff"
-  ctx.font = "32px courier"
+  ctx.font = "22px courier"
   if (so.fuel < 250) ctx.fillStyle = "#ff0"
   if (so.fuel < 150) ctx.fillStyle = "#f00"
   let xtext: number = 200
@@ -293,9 +336,9 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   ctx.fillText("sif: " + so.shotsInFlight.length, xtext, 0)
   ctx.fillText("ammo: " + so.ammo, xtext, 50)
   ctx.fillText("health: " + round2dec(so.health, 1), xtext, 100)
-  ctx.fillText("shield: " + so.shieldPower, xtext, 150)
-  ctx.fillText("angle: " + Math.abs(so.angleDegree % 360), xtext, 200)
-  ctx.rotate(((90 + so.angleDegree) * Math.PI) / 180)
+  ctx.fillText("heat: " + round2dec(so.canonCoolDown, 1), xtext, 150)
+  ctx.fillText("angle: " + round2dec(Math.abs(so.angleDegree % 360)), xtext, 200)
+  ctx.rotate((round2dec(90 + so.angleDegree, 1) * Math.PI) / 180)
   ctx.beginPath()
   ctx.strokeStyle = so.color
   ctx.lineWidth = 5
@@ -303,10 +346,10 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   // hull
   ctx.strokeStyle = so.colliding ? "#f00" : so.color
   ctx.fillStyle = so.colliding ? "#f00" : so.color
-  ctx.moveTo(0, (-so.size.y / 2) * scale)
-  ctx.lineTo((-so.size.x / 4) * scale, (so.size.y / 4) * scale)
-  ctx.lineTo((so.size.x / 4) * scale, (so.size.y / 4) * scale)
-  ctx.lineTo(0, (-so.size.y / 2) * scale)
+  ctx.moveTo(0, (-shipSize.y / 2) * scale)
+  ctx.lineTo((-shipSize.x / 4) * scale, (shipSize.y / 4) * scale)
+  ctx.lineTo((shipSize.x / 4) * scale, (shipSize.y / 4) * scale)
+  ctx.lineTo(0, (-shipSize.y / 2) * scale)
 
   // canons
   const cannonWidth: number = 10
@@ -337,6 +380,15 @@ function drawTriangleObject(so: SpaceObject, ctx: any) {
   ctx.restore()
   // drawVector(so.velocity, so.position, 5, ctx)
   drawShot(so, ctx)
+
+  if (so.afterBurnerEnabled) {
+    renderAfterBurnerFrame(addc(so.position, scalarMultiply(headingFromAngle(so.angleDegree-180), 60)), ctx)
+  }
+
+  // ctx.lineWidth = 2
+  // ctx.strokeStyle = '#00f'
+  // ctx.strokeRect(so.position.x, so.position.y, so.size.x, so.size.y)
+
 }
 
 function drawVector(
@@ -364,7 +416,7 @@ let rightStrafePressed = false
 let leftStrafePressed = false
 let leftPressed: boolean = false
 let spacePressed: boolean = false
-let bounce: boolean = false
+let bounce: boolean = true
 
 function arrowControl(e: any, value: boolean) {
   if (e.key === "ArrowUp") {
@@ -415,19 +467,25 @@ function applyEngine(so: SpaceObject): number {
   return 0
 }
 
+
 function fire(so: SpaceObject) {
   if (so.ammo < 1) {
     console.log(so.name + ' is out of ammo')
     return
   }
+  if (so.canonOverHeat) {
+    return
+  }
+  so.canonCoolDown+=so.canonHeatConstant
   so.ammo--
   let shot = createDefaultSpaceObject()
-  shot.size = { x: rndi(3, 4), y: rndi(40, 50) }
+  shot.damage = so.missileDamage
+  shot.size = { x: rndi(2, 3), y: rndi(30, 45) }
   shot.color = randomGreen()
   let head: Vec2d = copy(so.position)
-  const aimError = 10
-  const headError = 0.2
-  const speedError = 2.5
+  const aimError = 8
+  const headError = 0.019
+  const speedError = 1.8
   head = add(head, scalarMultiply(heading(so), 15))
   head = add(head, {
     x: rndi(-aimError, aimError),
@@ -470,12 +528,12 @@ function decayOffScreenShots(so: SpaceObject, screen: Vec2d) {
 }
 
 function renderExplosionFrame(pos: Vec2d, ctx: any) {
-  let offset: number = 14
-  let minSize: number = 2
-  let maxSize: number = 30
+  let offset: number = 7
+  let minSize: number = 1
+  let maxSize: number = 12
   ctx.save()
   ctx.translate(pos.x, pos.y)
-  for (let c of ['#ff0', '#f00']) {
+  for (let c of ['#ff0', '#f00', '#ee0', '#e00', '#dd0', '#d00', '#008', '#000', '#444']) {
     let center = add({x: 0, y: 0}, {x: rndi(-offset, offset), y : rndi(-offset, offset)})
     let size = add({x: 0, y: 0}, {x: rndi(minSize, maxSize), y : rndi(minSize, maxSize)})
     ctx.fillStyle = c
@@ -483,6 +541,22 @@ function renderExplosionFrame(pos: Vec2d, ctx: any) {
   }
   ctx.restore()
 }
+
+function renderAfterBurnerFrame(pos: Vec2d, ctx: any) {
+  let offset: number = 12
+  let minSize: number = 4
+  let maxSize: number = 9
+  ctx.save()
+  ctx.translate(pos.x, pos.y)
+  for (let c of ['#ff0', '#00f', '#ee0', '#e00', '#ccc', '#ccc', '#aaa', '#999', '#888']) {
+    let center = add({x: 0, y: 0}, {x: rndi(-offset, offset), y : rndi(-offset, offset)})
+    let size = add({x: 0, y: 0}, {x: rndi(minSize, maxSize), y : rndi(minSize, maxSize)})
+    ctx.fillStyle = c
+    ctx.fillRect(center.x, center.y, size.x, size.y)
+  }
+  ctx.restore()
+}
+
 
 function decayDeadShots(so: SpaceObject) {
   so.shotsInFlight = decayDeadSpaceObjects(so.shotsInFlight)
@@ -500,7 +574,9 @@ function applySteer(so: SpaceObject): number {
 }
 
 function spaceObjectKeyController(so: SpaceObject) {
+  so.afterBurnerEnabled = false
   if (upPressed) {
+    so.afterBurnerEnabled = true
     let angleRadians: number = (so.angleDegree * Math.PI) / 180
     let engine = applyEngine(so)
     add(so.velocity, {
@@ -560,9 +636,23 @@ function handleHittingShot(shot: SpaceObject, ctx: any) {
   }
 }
 
+function coolDown(so: SpaceObject) {
+
+  if (so.canonCoolDown >= 100) {
+    so.canonOverHeat = true
+  }
+
+  so.canonCoolDown-=8
+  if (so.canonCoolDown < 1) {
+    so.canonCoolDown = 0
+    so.canonOverHeat = false
+  }
+}
+
 function updateSpaceObject(so: SpaceObject, screen: Vec2d, ctx: any) {
   add(so.position, so.velocity)
   add(so.velocity, so.acceleration)
+  coolDown(so)
   for (let shot of so.shotsInFlight) {
     add(shot.position, shot.velocity)
     add(shot.velocity, shot.acceleration)
@@ -573,11 +663,11 @@ function updateSpaceObject(so: SpaceObject, screen: Vec2d, ctx: any) {
   }
   // decayShots(so, screen)
   decayDeadShots(so)
-  removeShotsAfterBounces(so, 5)
+  removeShotsAfterBounces(so, 1)
 }
 
-function handleCollisions(spaceObjects: SpaceObject[]) {
-  const vibration: number = 1
+function handleCollisions(spaceObjects: SpaceObject[], ctx: any) {
+  const vibration: number = 0
   for (let so0 of spaceObjects) {
     for (let so1 of spaceObjects) {
       if (isColliding(so0, so1) && so0.name !== so1.name) {
@@ -585,6 +675,10 @@ function handleCollisions(spaceObjects: SpaceObject[]) {
         so1.colliding = true
         so0.collidingWith.push(so1)
         so1.collidingWith.push(so0)
+        so0.health-=50
+        so1.health-=50
+        renderExplosionFrame(so0.position, ctx)
+        renderExplosionFrame(so1.position, ctx)
       }
       for (let shot of so0.shotsInFlight) {
         if (shot.armedDelay < 0) {
@@ -614,21 +708,26 @@ function resetCollisions(spaceObjects: SpaceObject[]) {
 }
 
 
-const numberOfAsteroids: number = 100
+const numberOfAsteroids: number = 80
 let myShip: SpaceObject = createDefaultSpaceObject()
 let allSpaceObjects: SpaceObject[] = []
 
 function init(cid: number) {
 
   myShip.name = "Player" + cid
-  myShip.health = 2000
-  myShip.fuel = 2000
-  myShip.ammo = 3000
-  myShip.missileSpeed = 38
-  myShip.size = { x: 40, y: 80 }
-  myShip.steeringPower = 1.2
-  myShip.enginePower = 0.09
+  myShip.shape = Shape.Ship
+  myShip.health = 9000
+  myShip.fuel = 270
+  myShip.ammo = 90
+  myShip.missileSpeed = 31
+  myShip.missileDamage = 6000
+  myShip.canonHeatConstant = 100
+  myShip.size = { x: 50, y: 50 }
+  myShip.steeringPower = 1.12
+  myShip.enginePower = 0.063
   myShip.color = '#fff'
+  myShip.position = {x: 700, y: 600}
+  myShip.velocity = {x: 0.4, y: -0.6}
 
   allSpaceObjects.push(myShip)
 
@@ -640,7 +739,9 @@ function init(cid: number) {
     let a: SpaceObject = createDefaultSpaceObject()
     a.shape = Shape.Asteroid
     a.name = "Asteroid #" + i
-    a.health = 60
+    a.health = 5500
+    let size: number = rndi(10, 30)
+    a.size = {x: size, y: size}
     allSpaceObjects.push(a)
   }
   console.log(allSpaceObjects)
@@ -657,21 +758,23 @@ function renderFrame(ctx: any) {
 function nextFrame(ctx: any) {
   const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
   // const center: Vec2d = { x: ctx.canvas.width/2, y: ctx.canvas.height/2 }
+  
   // renderExplosionFrame(center, ctx)
 
   allSpaceObjects = decayDeadSpaceObjects(allSpaceObjects)
-  handleCollisions(allSpaceObjects)
+  handleCollisions(allSpaceObjects, ctx)
   spaceObjectKeyController(myShip)
 
   for (let so of allSpaceObjects) {
     if (bounce) {
-      bounceSpaceObject(so, screen, 0.2)
+      bounceSpaceObject(so, screen, 0.9995)
     } else {
       wrapSpaceObject(so, screen)
     }
-    friction(so, 0.992)
+    // friction(so, 0.992)
     updateSpaceObject(so, screen, ctx)
   }
+  friction(myShip, 0.991)
 }
 
 
