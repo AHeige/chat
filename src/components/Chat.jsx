@@ -24,6 +24,7 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
       PaperProps={{
         sx: {
           backgroundColor: "#000",
+          height: "100vh",
         },
       }}
       variant='persistent'
@@ -62,7 +63,7 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
       </Grid>
 
       <ChatInput
-        style={{ backgroundColor: "#000" }}
+        style={{ backgroundColor: "#000", position: "fixed", bottom: "0" }}
         sendMessage={sendMessage}
       />
 
