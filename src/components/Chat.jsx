@@ -20,40 +20,56 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
   }, [messages, isOpen])
 
   return (
-    <Drawer variant="persistent" anchor="right" open={isOpen} hideBackdrop>
+    <Drawer
+      PaperProps={{
+        sx: {
+          backgroundColor: "#000",
+        },
+      }}
+      variant='persistent'
+      anchor='right'
+      open={isOpen}
+      hideBackdrop>
       <Stack
-        direction="row"
+        direction='row'
         spacing={2}
         style={{
           marginTop: "0.7em",
           marginBottom: "0.7em",
           position: "fixed",
           right: "0",
-        }}
-      >
+        }}>
         <Button
-          variant="contained"
+          variant='contained'
           startIcon={<CommentIcon />}
           endIcon={<EastIcon />}
-          onClick={() => setIsOpen(false)}
-        ></Button>
+          onClick={() => setIsOpen(false)}></Button>
       </Stack>
       <Grid
         container
+        direction='row'
         alignContent={"flex-end"}
         style={{
           width: "100vw",
-          height: "95%",
-        }}
-      >
+          //minHeight: "100vh",
+          marginBottom: "3.5em",
+          backgroundColor: "#000",
+          flex: "auto",
+        }}>
         <Grid item>
           <ChatMessages messages={messages} />
         </Grid>
       </Grid>
 
-      <ChatInput sendMessage={sendMessage} />
+      <ChatInput
+        style={{ backgroundColor: "#000" }}
+        sendMessage={sendMessage}
+      />
 
-      <Grid item style={{ height: "0px" }} ref={bottomRef}></Grid>
+      <Grid
+        item
+        style={{ height: "0px", backgroundColor: "#000" }}
+        ref={bottomRef}></Grid>
     </Drawer>
   )
 }

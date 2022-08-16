@@ -33,11 +33,14 @@ const ChatInput = ({ sendMessage }) => {
     <>
       <Paper
         elevation={3}
-        style={{ position: "fixed", bottom: 0, width: "100vw" }}
-      >
+        style={{
+          position: "fixed",
+          bottom: 0,
+          width: "100vw",
+          backgroundColor: "#000",
+        }}>
         <BottomNavigation
-          style={{ backgroundColor: "#CBD7DA", justifyContent: "left" }}
-        >
+          style={{ backgroundColor: "#CBD7DA", justifyContent: "left" }}>
           <Box
             style={{
               marginTop: "0.7em",
@@ -45,38 +48,34 @@ const ChatInput = ({ sendMessage }) => {
               marginLeft: "1em",
               marginRight: "1em",
               width: "100%",
-              backgroundColor: "#fff",
+              backgroundColor: "#000",
               //borderRadius: "20px",
-            }}
-          >
+            }}>
             <Input
               style={{
-                //backgroundColor: "#D3D3D3",
+                backgroundColor: "#fff",
                 //borderRadius: "5px",
                 width: "100%",
                 height: "100%",
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
-              placeholder="Send a message"
+              placeholder='Send a message'
               disableUnderline={true}
-              inputRef={ref}
-            ></Input>
+              inputRef={ref}></Input>
           </Box>
           <Stack
-            direction="row"
+            direction='row'
             spacing={2}
             style={{
               marginTop: "0.7em",
               marginBottom: "0.7em",
               marginRight: "0.7em",
-            }}
-          >
+            }}>
             <Button
-              variant="contained"
+              variant='contained'
               endIcon={<SendIcon />}
-              onClick={() => buttonSend()}
-            >
+              onClick={() => buttonSend()}>
               Send
             </Button>
           </Stack>

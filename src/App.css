@@ -5,15 +5,17 @@ body {
   color: #000;
   -webkit-font-smoothing: antialiased;
   margin: 0px;
-  background-color: #cbd7da;
+  background-color: #000;
 }
 
 .Game2DCanvas {
   width: 100%;
+  max-width: 1700px;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+
   /* border: 10px dashed darkgoldenrod; */
   /* border: 20px dashed #000; */
   /* border: 5px solid pink; */
