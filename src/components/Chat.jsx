@@ -12,7 +12,7 @@ import Button from "@mui/material/Button"
 import EastIcon from "@mui/icons-material/East"
 import CommentIcon from "@mui/icons-material/Comment"
 
-const Chat = ({sendMessage, messages, isOpen, setIsOpen}) => {
+const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -28,6 +28,7 @@ const Chat = ({sendMessage, messages, isOpen, setIsOpen}) => {
           marginTop: "0.7em",
           marginBottom: "0.7em",
           position: "fixed",
+          right: "0",
         }}
       >
         <Button
@@ -40,14 +41,19 @@ const Chat = ({sendMessage, messages, isOpen, setIsOpen}) => {
       <Grid
         container
         alignContent={"flex-end"}
-        style={{ minWidth: "28em", marginBottom: "3.5em" }}
+        style={{
+          width: "100vw",
+          height: "95%",
+        }}
       >
         <Grid item>
           <ChatMessages messages={messages} />
         </Grid>
       </Grid>
+
       <ChatInput sendMessage={sendMessage} />
-      <Grid item ref={bottomRef}></Grid>
+
+      <Grid item style={{ height: "0px" }} ref={bottomRef}></Grid>
     </Drawer>
   )
 }

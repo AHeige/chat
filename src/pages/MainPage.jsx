@@ -6,21 +6,26 @@ import Game2D from "../components/Game2D"
 
 //Components
 import Chat from "../components/Chat"
+import SimpleDialog from "../components/SimpleDialog"
+import SettingsMenu from "../components/SettingsMenu"
 
 //Material UI
 import Grid from "@mui/material/Grid"
 import WestIcon from "@mui/icons-material/West"
 import CommentIcon from "@mui/icons-material/Comment"
+import SettingsIcon from "@mui/icons-material/Settings"
 import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
 import AppBar from "@mui/material/AppBar"
+import TuneIcon from "@mui/icons-material/Tune"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
   const [sock, setSock] = useState()
   const [clientId, setClientId] = useState(-1)
   const [socketLost, setSocketLost] = useState(false)
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
+  const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080")
@@ -50,9 +55,9 @@ const MainPage = () => {
           return getCidFromCookie()
         })
 
-        msgObj.messageHistory.forEach(msg => {
+        msgObj.messageHistory.forEach((msg) => {
           addMessage(msg)
-        });
+        })
       }
 
       if (getCidFromCookie() === false) {
@@ -66,9 +71,9 @@ const MainPage = () => {
       }
 
       if (msgObj.initMessage) {
-        msgObj.messageHistory.forEach(msg => {
+        msgObj.messageHistory.forEach((msg) => {
           addMessage(msg)
-        });
+        })
         console.log("initMessage")
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
         sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
@@ -125,7 +130,7 @@ const MainPage = () => {
 
   const colorPicker = () => {
     const number = Math.floor(Math.random() * 5) + 1
-    console.log(number)
+
     return number
   }
 
@@ -137,8 +142,6 @@ const MainPage = () => {
     if (sock.readyState !== 1) {
       setSocketLost((oldVal) => !oldVal)
     }
-
-    console.log(message)
 
     const messageObject = {
       text: message,
@@ -156,16 +159,31 @@ const MainPage = () => {
     sendMessage(messageObject)
   }
 
+  const handleClose = () => {
+    setOpenDialog(false)
+  }
+
   return (
     <>
-      <AppBar style={{ alignItems: "end" }} color="inherit" elevation={2}>
+      <AppBar
+        style={{ alignItems: "end", position: "fixed" }}
+        color="transparent"
+        elevation={0}
+      >
         <Stack
           direction="row"
           spacing={2}
           style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
         >
           <Button
-            variant="contained"
+            variant="outlined"
+            onClick={() => setOpenDialog(true)}
+            style={{ margin: "0" }}
+          >
+            <SettingsIcon />
+          </Button>
+          <Button
+            variant="outlined"
             startIcon={<CommentIcon />}
             endIcon={<WestIcon />}
             onClick={() => setIsOpen(true)}
@@ -173,6 +191,13 @@ const MainPage = () => {
         </Stack>
       </AppBar>
       <Grid container>
+        <SimpleDialog
+          open={openDialog}
+          handleClose={handleClose}
+          title={"Settings"}
+          titleIcon={<TuneIcon />}
+          bodyComponent={<SettingsMenu />}
+        />
         <Grid item xs={12}>
           <Game2D id="aster" cid={clientId}></Game2D>
         </Grid>

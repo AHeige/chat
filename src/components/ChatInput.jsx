@@ -33,7 +33,7 @@ const ChatInput = ({ sendMessage }) => {
     <>
       <Paper
         elevation={3}
-        style={{ position: "fixed", bottom: 0, width: "78%" }}
+        style={{ position: "fixed", bottom: 0, width: "100vw" }}
       >
         <BottomNavigation
           style={{ backgroundColor: "#CBD7DA", justifyContent: "left" }}
@@ -44,7 +44,7 @@ const ChatInput = ({ sendMessage }) => {
               marginBottom: "0.7em",
               marginLeft: "1em",
               marginRight: "1em",
-              width: "19.5em",
+              width: "100%",
               backgroundColor: "#fff",
               //borderRadius: "20px",
             }}
@@ -66,7 +66,11 @@ const ChatInput = ({ sendMessage }) => {
           <Stack
             direction="row"
             spacing={2}
-            style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
+            style={{
+              marginTop: "0.7em",
+              marginBottom: "0.7em",
+              marginRight: "0.7em",
+            }}
           >
             <Button
               variant="contained"

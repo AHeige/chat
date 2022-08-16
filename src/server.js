@@ -3,11 +3,11 @@ const PORT = 8080
 const wss = new ws.WebSocketServer({
   port: PORT,
 })
-const app_version = require('../package.json').version
-const app_name = require('../package.json').name
-const server_name = app_name + '_server_' + app_version
+const app_version = require("../package.json").version
+const app_name = require("../package.json").name
+const server_name = app_name + "_server_" + app_version
 const host_version = process.version
-console.log (server_name + ' running on node ' + host_version)
+console.log(server_name + " running on node " + host_version)
 
 // some connected user did send a message. DateTime, UserID, message.
 // clients are a user with a UserID. OnMessageSent the client send a ws packet with messageData
@@ -83,7 +83,7 @@ function sendWelcomeMessage(ws, scid) {
       srvAck: true,
       initMessage: true,
       scid: scid,
-      messageHistory: broadcastedMessagesList
+      messageHistory: broadcastedMessagesList,
     })
   )
 }
@@ -114,7 +114,7 @@ function sendCidRequestMessage(ws, cid, scid) {
       user: server_name,
       srvAck: true,
       color: textColor[colorPicker],
-      messageHistory: broadcastedMessagesList
+      messageHistory: broadcastedMessagesList,
     })
   )
 }

@@ -6,15 +6,25 @@ import CardContent from "@mui/material/CardContent"
 import SystemMessageBlock from "./SystemMessageBlock"
 import RegularMessageBlock from "./RegularMessageBlock"
 
-const MessageCard = ({msgObj}) => {
+const MessageCard = ({ msgObj }) => {
+  const systemMessage =
+    msgObj.userJoined ||
+    msgObj.userLeft ||
+    msgObj.initMessage ||
+    msgObj.cidResponse
 
-    const systemMessage = msgObj.userJoined || msgObj.userLeft || msgObj.initMessage || msgObj.cidResponse
-
-    return (
-        <CardContent style={{ fontSize: "1em" }}>
-            {(systemMessage ? <SystemMessageBlock msgObj={msgObj}/> : <RegularMessageBlock msgObj={msgObj}/>)}
-        </CardContent>
-    )
+  return (
+    <CardContent style={{ fontSize: "1em", color: "red" }}>
+      {systemMessage ? (
+        <SystemMessageBlock msgObj={msgObj} />
+      ) : (
+        <RegularMessageBlock
+          style={{ alignContent: "right" }}
+          msgObj={msgObj}
+        />
+      )}
+    </CardContent>
+  )
 }
 
 export default MessageCard
