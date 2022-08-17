@@ -12,7 +12,7 @@ import Button from "@mui/material/Button"
 import EastIcon from "@mui/icons-material/East"
 import CommentIcon from "@mui/icons-material/Comment"
 
-const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
+const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -27,31 +27,28 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
           height: "100vh",
         },
       }}
-      variant="persistent"
-      anchor="right"
+      variant='persistent'
+      anchor='right'
       open={isOpen}
-      hideBackdrop
-    >
+      hideBackdrop>
       <Stack
-        direction="row"
+        direction='row'
         spacing={2}
         style={{
           marginTop: "0.7em",
           marginBottom: "0.7em",
           position: "fixed",
           right: "0",
-        }}
-      >
+        }}>
         <Button
-          variant="contained"
+          variant='contained'
           startIcon={<CommentIcon />}
           endIcon={<EastIcon />}
-          onClick={() => setIsOpen(false)}
-        ></Button>
+          onClick={() => setIsOpen(false)}></Button>
       </Stack>
       <Grid
         container
-        direction="row"
+        direction='row'
         alignContent={"flex-end"}
         style={{
           width: "100vw",
@@ -59,11 +56,8 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen }) => {
           marginBottom: "3.5em",
           //backgroundColor: "#000",
           flex: "auto",
-        }}
-      >
-        <Grid item>
-          <ChatMessages messages={messages} />
-        </Grid>
+        }}>
+        <ChatMessages messages={messages} clientId={clientId} />
       </Grid>
 
       <ChatInput

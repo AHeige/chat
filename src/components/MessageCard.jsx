@@ -14,7 +14,7 @@ const MessageCard = ({ msgObj }) => {
     msgObj.cidResponse
 
   return (
-    <CardContent style={{ fontSize: "1em" }}>
+    <CardContent style={{ fontSize: "1em", marginLeft: "1em" }}>
       {systemMessage ? (
         <SystemMessageBlock msgObj={msgObj} />
       ) : (

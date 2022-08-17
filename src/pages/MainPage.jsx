@@ -168,27 +168,23 @@ const MainPage = () => {
     <>
       <AppBar
         style={{ alignItems: "end", position: "fixed" }}
-        color="transparent"
-        elevation={0}
-      >
+        color='transparent'
+        elevation={0}>
         <Stack
-          direction="row"
+          direction='row'
           spacing={2}
-          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
-        >
+          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}>
           <Button
-            variant="outlined"
+            variant='outlined'
             onClick={() => setOpenDialog(true)}
-            style={{ margin: "0" }}
-          >
+            style={{ margin: "0" }}>
             <SettingsIcon />
           </Button>
           <Button
-            variant="outlined"
+            variant='outlined'
             startIcon={<CommentIcon />}
             endIcon={<WestIcon />}
-            onClick={() => setIsOpen(true)}
-          ></Button>
+            onClick={() => setIsOpen(true)}></Button>
         </Stack>
       </AppBar>
 
@@ -201,7 +197,7 @@ const MainPage = () => {
           bodyComponent={<SettingsMenu />}
         />
         <Grid item xs={12}>
-          <Game2D id="aster" cid={clientId}></Game2D>
+          <Game2D id='aster' cid={clientId}></Game2D>
         </Grid>
         <Grid item xs={12}>
           <Chat
@@ -209,6 +205,7 @@ const MainPage = () => {
             sendMessage={handleMessageSubmit}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
+            clientId={clientId}
           />
         </Grid>
       </Grid>
