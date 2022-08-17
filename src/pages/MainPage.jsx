@@ -12,6 +12,7 @@ import SettingsMenu from "../components/SettingsMenu"
 //Material UI
 import Grid from "@mui/material/Grid"
 import WestIcon from "@mui/icons-material/West"
+import EastIcon from "@mui/icons-material/East"
 import CommentIcon from "@mui/icons-material/Comment"
 import SettingsIcon from "@mui/icons-material/Settings"
 import Stack from "@mui/material/Stack"
@@ -180,26 +181,23 @@ const MainPage = () => {
     <>
       <AppBar
         style={{ alignItems: "end", position: "fixed", zIndex: "10000" }}
-        color="transparent"
-        elevation={0}
-      >
+        color={isOpen ? "default" : "transparent"}
+        elevation={0}>
         <Stack
-          direction="row"
+          direction='row'
           spacing={2}
-          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
-        >
-          <Button variant="outlined" onClick={toggleDarkMode}>
+          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}>
+          <Button variant='outlined' onClick={toggleDarkMode}>
             {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
           </Button>
-          <Button variant="outlined" onClick={() => setOpenDialog(true)}>
+          <Button variant='outlined' onClick={() => setOpenDialog(true)}>
             <SettingsIcon />
           </Button>
           <Button
-            variant="outlined"
+            variant='outlined'
             startIcon={<CommentIcon />}
-            endIcon={<WestIcon />}
-            onClick={toggleDrawer}
-          ></Button>
+            endIcon={isOpen ? <EastIcon /> : <WestIcon />}
+            onClick={toggleDrawer}></Button>
         </Stack>
       </AppBar>
 
@@ -212,7 +210,7 @@ const MainPage = () => {
           bodyComponent={<SettingsMenu />}
         />
         <Grid item xs={12}>
-          <Game2D id="aster" cid={clientId}></Game2D>
+          <Game2D id='aster' cid={clientId}></Game2D>
         </Grid>
         <Grid item xs={12}>
           <Chat

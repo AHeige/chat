@@ -7,12 +7,8 @@ import ChatMessages from "./ChatMessages"
 //Material UI
 import Grid from "@mui/material/Grid"
 import Drawer from "@mui/material/Drawer"
-import Stack from "@mui/material/Stack"
-import Button from "@mui/material/Button"
-import EastIcon from "@mui/icons-material/East"
-import CommentIcon from "@mui/icons-material/Comment"
 
-const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
+const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -25,16 +21,16 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
         sx: {
           //backgroundColor: "#000",
           height: "100vh",
+          right: "unset",
         },
       }}
-      variant="persistent"
-      anchor="right"
+      variant='persistent'
+      anchor='right'
       open={isOpen}
-      hideBackdrop
-    >
+      hideBackdrop>
       <Grid
         container
-        direction="row"
+        direction='row'
         alignContent={"flex-end"}
         style={{
           width: "100vw",
@@ -42,8 +38,7 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
           marginBottom: "3.5em",
           //backgroundColor: "#000",
           flex: "auto",
-        }}
-      >
+        }}>
         <ChatMessages messages={messages} clientId={clientId} />
       </Grid>
 
