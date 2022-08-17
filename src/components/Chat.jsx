@@ -36,6 +36,7 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
           width: "100vw",
           //minHeight: "100vh",
           marginBottom: "3.5em",
+          marginTop: "2.8em",
           //backgroundColor: "#000",
           flex: "auto",
         }}>
