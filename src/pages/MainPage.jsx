@@ -18,6 +18,7 @@ import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
 import AppBar from "@mui/material/AppBar"
 import TuneIcon from "@mui/icons-material/Tune"
+import Paper from "@mui/material/Paper"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
@@ -190,6 +191,7 @@ const MainPage = () => {
           ></Button>
         </Stack>
       </AppBar>
+
       <Grid container>
         <SimpleDialog
           open={openDialog}
