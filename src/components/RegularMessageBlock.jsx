@@ -1,17 +1,39 @@
 import React from "react"
 
 //Material UI
+import { useTheme } from "@mui/material/styles"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
+import CardHeader from "@mui/material/CardHeader"
 
-const RegularMessageBlock = ({ msgObj }) => {
+const RegularMessageBlock = ({ msgObj, clientId }) => {
+  const myMessage = msgObj.cid === clientId
+
+  const messageDate = new Date(msgObj.rxDate).toLocaleTimeString("sv-SV")
+
   return (
-    <Card style={{ width: "fit-content" }}>
+    <Card
+      style={{
+        width: "fit-content",
+        backgroundColor: myMessage ? "rgb(212, 168, 140)" : "#E4E6EB",
+        color: myMessage ? "#fff" : "#000",
+        textAlign: "left",
+        borderRadius: "18px",
+        borderBottomLeftRadius: myMessage ? "18px" : "4px",
+        borderBottomRightRadius: myMessage ? "4px" : "18px",
+      }}
+    >
       <CardContent style={{ width: "fit-content" }}>
-        {(msgObj.srvAck ? "" : "*") +
-          new Date(msgObj.rxDate).toLocaleTimeString("sv-SV")}{" "}
-        {msgObj.user + ": "}
-        <span style={{ color: msgObj.color }}>{msgObj.text}</span>
+        <span>{msgObj.text}</span>
+        <CardHeader
+          sx={{ textAlign: "left", padding: "0", opacity: "0.5" }}
+          subheaderTypographyProps={{
+            color: myMessage ? "#fff" : "#000",
+          }}
+          subheader={
+            msgObj.user + " - " + (msgObj.srvAck ? "" : "*") + messageDate
+          }
+        />
       </CardContent>
     </Card>
   )

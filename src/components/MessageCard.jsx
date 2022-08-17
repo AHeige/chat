@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext } from "react"
 
 //Material UI
 import Card from "@mui/material/Card"
@@ -6,7 +6,12 @@ import CardContent from "@mui/material/CardContent"
 import SystemMessageBlock from "./SystemMessageBlock"
 import RegularMessageBlock from "./RegularMessageBlock"
 
-const MessageCard = ({ msgObj }) => {
+//Contexts
+import { SettingsContext } from "../contexts/settingsContext"
+
+const MessageCard = ({ msgObj, clientId }) => {
+  const { showChatLogs } = useContext(SettingsContext)
+
   const systemMessage =
     msgObj.userJoined ||
     msgObj.userLeft ||
@@ -14,16 +19,22 @@ const MessageCard = ({ msgObj }) => {
     msgObj.cidResponse
 
   return (
-    <CardContent style={{ fontSize: "1em", marginLeft: "1em" }}>
-      {systemMessage ? (
-        <SystemMessageBlock msgObj={msgObj} />
-      ) : (
-        <RegularMessageBlock
-          style={{ alignContent: "right" }}
-          msgObj={msgObj}
-        />
+    <>
+      {systemMessage && showChatLogs && (
+        <CardContent style={{ fontSize: "1em", marginLeft: "1em" }}>
+          <SystemMessageBlock msgObj={msgObj} />
+        </CardContent>
       )}
-    </CardContent>
+      {!systemMessage && (
+        <CardContent style={{ fontSize: "1em", marginLeft: "1em" }}>
+          <RegularMessageBlock
+            style={{ alignContent: "right" }}
+            msgObj={msgObj}
+            clientId={clientId}
+          />
+        </CardContent>
+      )}
+    </>
   )
 }
 

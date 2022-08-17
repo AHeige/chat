@@ -27,28 +27,14 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
           height: "100vh",
         },
       }}
-      variant='persistent'
-      anchor='right'
+      variant="persistent"
+      anchor="right"
       open={isOpen}
-      hideBackdrop>
-      <Stack
-        direction='row'
-        spacing={2}
-        style={{
-          marginTop: "0.7em",
-          marginBottom: "0.7em",
-          position: "fixed",
-          right: "0",
-        }}>
-        <Button
-          variant='contained'
-          startIcon={<CommentIcon />}
-          endIcon={<EastIcon />}
-          onClick={() => setIsOpen(false)}></Button>
-      </Stack>
+      hideBackdrop
+    >
       <Grid
         container
-        direction='row'
+        direction="row"
         alignContent={"flex-end"}
         style={{
           width: "100vw",
@@ -56,7 +42,8 @@ const Chat = ({ sendMessage, messages, isOpen, setIsOpen, clientId }) => {
           marginBottom: "3.5em",
           //backgroundColor: "#000",
           flex: "auto",
-        }}>
+        }}
+      >
         <ChatMessages messages={messages} clientId={clientId} />
       </Grid>
 

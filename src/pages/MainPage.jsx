@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useContext } from "react"
 import Cookies from "js-cookie"
 
 //Pages
@@ -19,6 +19,11 @@ import Button from "@mui/material/Button"
 import AppBar from "@mui/material/AppBar"
 import TuneIcon from "@mui/icons-material/Tune"
 import Paper from "@mui/material/Paper"
+import LightModeIcon from "@mui/icons-material/LightMode"
+import DarkModeIcon from "@mui/icons-material/DarkMode"
+
+//Contexts
+import { DarkModeContext } from "../contexts/themeContext"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
@@ -27,6 +32,9 @@ const MainPage = () => {
   const [socketLost, setSocketLost] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
+
+  //Context
+  const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080")
@@ -164,27 +172,34 @@ const MainPage = () => {
     setOpenDialog(false)
   }
 
+  const toggleDrawer = () => {
+    setIsOpen(!isOpen)
+  }
+
   return (
     <>
       <AppBar
-        style={{ alignItems: "end", position: "fixed" }}
-        color='transparent'
-        elevation={0}>
+        style={{ alignItems: "end", position: "fixed", zIndex: "10000" }}
+        color="transparent"
+        elevation={0}
+      >
         <Stack
-          direction='row'
+          direction="row"
           spacing={2}
-          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}>
-          <Button
-            variant='outlined'
-            onClick={() => setOpenDialog(true)}
-            style={{ margin: "0" }}>
+          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
+        >
+          <Button variant="outlined" onClick={toggleDarkMode}>
+            {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+          </Button>
+          <Button variant="outlined" onClick={() => setOpenDialog(true)}>
             <SettingsIcon />
           </Button>
           <Button
-            variant='outlined'
+            variant="outlined"
             startIcon={<CommentIcon />}
             endIcon={<WestIcon />}
-            onClick={() => setIsOpen(true)}></Button>
+            onClick={toggleDrawer}
+          ></Button>
         </Stack>
       </AppBar>
 
@@ -197,7 +212,7 @@ const MainPage = () => {
           bodyComponent={<SettingsMenu />}
         />
         <Grid item xs={12}>
-          <Game2D id='aster' cid={clientId}></Game2D>
+          <Game2D id="aster" cid={clientId}></Game2D>
         </Grid>
         <Grid item xs={12}>
           <Chat

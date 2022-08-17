@@ -13,8 +13,12 @@ const ChatMessages = ({ messages, clientId }) => {
     <Grid
       item
       xs={12}
-      style={{ textAlign: obj.cid === clientId ? "-webkit-right" : "" }}>
-      <MessageCard key={index} msgObj={obj} />
+      style={{
+        textAlign: obj.cid === clientId ? "-webkit-right" : "",
+      }}
+      key={index}
+    >
+      <MessageCard key={index} msgObj={obj} clientId={clientId} />
     </Grid>
   ))
 }

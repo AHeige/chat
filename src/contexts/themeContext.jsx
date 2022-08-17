@@ -12,6 +12,7 @@ const darkTheme = createTheme({
     background: {
       default: "#000",
     },
+    chatBubble: "rosemary",
   },
 })
 
