@@ -55,7 +55,7 @@ function Game2D(props) {
   }, [props.senderFunc])
 
   return (
-    <div>
+    <div style={{ textAlign: "center" }}>
       <canvas
         ref={game2DcanvasRef}
         id={props.id}
