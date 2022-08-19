@@ -4,6 +4,8 @@ import React, { useState, createContext } from "react"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import { CssBaseline } from "@mui/material"
 
+import { ThemeContextProps } from "../interface/iTheme"
+
 const DarkModeContext = createContext()
 
 const darkTheme = createTheme({
@@ -12,7 +14,6 @@ const darkTheme = createTheme({
     background: {
       default: "#000",
     },
-    chatBubble: "rosemary",
   },
 })
 
@@ -23,7 +24,7 @@ const lightTheme = createTheme({
 })
 
 const DarkModeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
   }

@@ -6,7 +6,14 @@ import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
 
-const RegularMessageBlock = ({ msgObj, clientId }) => {
+import { msgObj } from "../interface/iMessages"
+
+interface Props {
+  msgObj: msgObj
+  clientId: number
+}
+
+const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
   const myMessage = msgObj.cid === clientId
 
   const messageDate = new Date(msgObj.rxDate).toLocaleTimeString("sv-SV")
@@ -28,7 +35,8 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
           borderRadius: "18px",
           borderBottomLeftRadius: myMessage ? "18px" : "4px",
           borderBottomRightRadius: myMessage ? "4px" : "18px",
-        }}>
+        }}
+      >
         <CardContent style={{ width: "fit-content", padding: "10px" }}>
           <span>{msgObj.text}</span>
         </CardContent>

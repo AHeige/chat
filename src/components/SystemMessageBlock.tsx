@@ -4,7 +4,13 @@ import React from "react"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 
-const SystemMessageBlock = ({ msgObj }) => {
+import { msgObj } from "../interface/iMessages"
+
+interface Props {
+  msgObj: msgObj
+}
+
+const SystemMessageBlock: React.FC<Props> = ({ msgObj }) => {
   // const SystemMessageBlock = () => {
 
   return (

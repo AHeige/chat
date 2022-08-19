@@ -13,7 +13,15 @@ import CloseIcon from "@mui/icons-material/Close"
 import { blue } from "@mui/material/colors"
 import Divider from "@mui/material/Divider"
 
-const SimpleDialog = ({
+interface Props {
+  open: boolean
+  handleClose: () => void
+  title: string
+  titleIcon: JSX.Element
+  bodyComponent: JSX.Element
+}
+
+const SimpleDialog: React.FC<Props> = ({
   open,
   handleClose,
   title,

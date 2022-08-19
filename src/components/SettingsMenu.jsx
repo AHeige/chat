@@ -19,6 +19,7 @@ import { SettingsContext } from "../contexts/settingsContext"
 
 const SettingsMenu = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
+
   const { showChatLogs, toggleShowChatLogs } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
