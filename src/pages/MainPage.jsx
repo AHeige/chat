@@ -38,7 +38,8 @@ const MainPage = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:5678")
+    const host = new URL(window.location.href).hostname
+    const socket = new WebSocket("ws://" + host + ":5678")
     setSock(socket)
     addEventListeners(socket)
   }, [socketLost])
