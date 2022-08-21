@@ -38,7 +38,7 @@ const MainPage = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080")
+    const socket = new WebSocket("ws://localhost:5678")
     setSock(socket)
     addEventListeners(socket)
   }, [socketLost])
@@ -213,7 +213,7 @@ const MainPage = () => {
           bodyComponent={<SettingsMenu />}
         />
         <Grid item xs={12}>
-          <Game2D id="aster" cid={clientId}></Game2D>
+          <Game2D id="aster1" cid={clientId}></Game2D>
         </Grid>
         <Grid item xs={12}>
           <Chat

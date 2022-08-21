@@ -1,6 +1,6 @@
 // import React from "react"
 import React, { useRef, useEffect } from "react"
-import pic32lander from "../interface/pic32lander"
+import {pic32lander} from "../interface/pic32lander"
 
 function renderFps(ctx, frameTime) {
   ctx.fillStyle = "#fff"
@@ -21,7 +21,7 @@ let lastTime_ms
 
 function renderLoop(ctx, sender, renderFrameCallback, nextFrameCallback, cid) {
   console.log("renderLoop")
-  pic32lander.init(cid)
+  pic32lander.init(cid, ctx)
   function update(time_ms) {
     clearScreen(ctx)
     renderFrameCallback(ctx)
@@ -40,8 +40,8 @@ function Game2D(props) {
     const canvas = game2DcanvasRef.current
     const context = canvas.getContext("2d")
 
-    context.canvas.width = 400 * 3
-    context.canvas.height = 300 * 3
+    context.canvas.width = 1600 * 2
+    context.canvas.height = 900 * 2
     // console.log("Canvas width: " + context.canvas.width)
     // console.log("Canvas height: " + context.canvas.height)
 

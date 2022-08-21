@@ -7,7 +7,8 @@ body {
 }
 
 .Game2DCanvas {
-  width: 100%;
+  width: 78%;
+  margin-top: 60px;
   max-width: 1500px;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;

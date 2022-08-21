@@ -2,6 +2,7 @@
 // Render the game with a main game renderFrame function.
 // Step to next animation frame with a nextFrame function
 
+
 function rndf(min: number, max: number) {
   return Math.random() * (max - min) + min
 }
@@ -56,6 +57,27 @@ function copy(from: Vec2d): Vec2d {
   return to
 }
 
+function copy2(from: Vec2d): Vec2d {
+  return { x: from.x, y: from.y }
+}
+
+
+function rndiVec(xyrnd: number): Vec2d {
+  return {x: rndi(0, xyrnd), y: rndi(0, xyrnd)}
+}
+
+function rndiVec_mm(min: number, max: number): Vec2d {
+  return {x: rndi(min, max), y: rndi(min, max)}
+}
+
+function rndfVec(xyrnd: number): Vec2d {
+  return {x: rndf(0, xyrnd), y: rndf(0, xyrnd)}
+}
+
+function rndfVec_mm(min: number, max: number): Vec2d {
+  return {x: rndf(min, max), y: rndf(min, max)}
+}
+
 function to_string(v: Vec2d): string {
   return "(" + round2dec(v.x, 0) + ", " + round2dec(v.y, 0) + ")"
 }
@@ -64,6 +86,17 @@ function scalarMultiply(v: Vec2d, s: number): Vec2d {
   v.x *= s
   v.y *= s
   return v
+}
+
+function round(v: Vec2d, decimals: number): Vec2d {
+  let tmp = copy2(v)
+  tmp.x = round2dec(tmp.x, decimals)
+  tmp.y = round2dec(tmp.y, decimals)
+  return tmp
+}
+
+function floor(v: Vec2d): Vec2d {
+  return {x: Math.floor(v.x), y: Math.floor(v.x)}
 }
 
 function magnitude(v: Vec2d): number {
@@ -218,7 +251,7 @@ type SpaceObject = {
 }
 
 function createDefaultSpaceObject(): SpaceObject {
-  let maxSpeed = 1
+  let maxSpeed = 1.5
   let so: SpaceObject = {
     shape: Shape.Triangle,
     mass: 1,
@@ -249,7 +282,7 @@ function createDefaultSpaceObject(): SpaceObject {
     armedDelay: 1,
     bounceCount: 0,
     didHit: false,
-    shotBlowFrame: 8,
+    shotBlowFrame: 16,
     afterBurnerEnabled: false
   }
 
@@ -273,11 +306,11 @@ function drawAsteroid(so: SpaceObject, ctx: any) {
   ctx.save()
   ctx.translate(so.position.x, so.position.y)
   ctx.fillStyle = so.colliding === true ? "#f00" : so.color
-  // ctx.font = "32px courier"
-  // ctx.fillText(so.name, 100, -50)
-  // ctx.fillText("health: " + so.health, 100, 0)
-  // ctx.fillText(to_string(so.position), 100, 50)
-  ctx.fillRect(-so.size.x / 2, -so.size.y / 2, so.size.x, so.size.y)
+  // ctx.fillRect(-so.size.x / 2, -so.size.y / 2, so.size.x, so.size.y)
+  ctx.fillRect(0, 0, so.size.x, so.size.y)
+  ctx.font = "22px courier"
+  ctx.fillStyle = '#000'
+  ctx.fillText(round2dec(so.health, 0), 5, 8+(so.size.y/2))
   ctx.restore()
 }
 
@@ -556,7 +589,7 @@ function renderExplosionFrame(pos: Vec2d, ctx: any) {
   let maxSize: number = 12
   ctx.save()
   ctx.translate(pos.x, pos.y)
-  for (let c of ['#ff0', '#f00', '#ee0', '#e00', '#dd0', '#d00', '#008', '#000', '#444']) {
+  for (let c of ['#ff0', '#f00', '#ee0', '#e00', '#dd0', '#d00', '#008', '#000', '#444', '#fee', '#f66,', '#f99', '#fbb']) {
     let center = add({x: 0, y: 0}, {x: rndi(-offset, offset), y : rndi(-offset, offset)})
     let size = add({x: 0, y: 0}, {x: rndi(minSize, maxSize), y : rndi(minSize, maxSize)})
     ctx.fillStyle = c
@@ -651,7 +684,7 @@ function spaceObjectKeyController(so: SpaceObject) {
 function handleHittingShot(shot: SpaceObject, ctx: any) {
   if (shot.didHit) {
     shot.shotBlowFrame--
-    shot.velocity = scalarMultiply(shot.velocity, 0.3)
+    shot.velocity = scalarMultiply(shot.velocity, -0.8)
     renderExplosionFrame(shot.position, ctx)
     if (shot.shotBlowFrame < 0) {
       shot.health = 0
@@ -698,8 +731,8 @@ function handleCollisions(spaceObjects: SpaceObject[], ctx: any) {
         so1.colliding = true
         so0.collidingWith.push(so1)
         so1.collidingWith.push(so0)
-        so0.health-=50
-        so1.health-=50
+        so0.health-=25
+        so1.health-=25
         renderExplosionFrame(so0.position, ctx)
         renderExplosionFrame(so1.position, ctx)
       }
@@ -735,20 +768,20 @@ const numberOfAsteroids: number = 80
 let myShip: SpaceObject = createDefaultSpaceObject()
 let allSpaceObjects: SpaceObject[] = []
 
-function init(cid: number) {
+function init(cid: number, ctx: any) {
 
   myShip.name = "Player" + cid
   myShip.shape = Shape.Ship
   myShip.health = 9000
-  myShip.fuel = 300
-  myShip.ammo = 1000
-  myShip.missileSpeed = 30
-  myShip.missileDamage = 6000
+  myShip.fuel = 400
+  myShip.ammo = 9000
+  myShip.missileSpeed = 32
+  myShip.missileDamage = 16
   myShip.canonHeatAddedPerShot = 100
-  myShip.canonCoolDownSpeed = 9
+  myShip.canonCoolDownSpeed = 50
   myShip.size = { x: 50, y: 50 }
-  myShip.steeringPower = 1.12
-  myShip.enginePower = 0.063
+  myShip.steeringPower = 0.88
+  myShip.enginePower = 0.055
   myShip.color = '#fff'
   myShip.position = {x: 700, y: 600}
   myShip.velocity = {x: 0.4, y: -0.6}
@@ -759,13 +792,14 @@ function init(cid: number) {
   console.log("adds event listeners")
   document.addEventListener("keydown", (event) => arrowControl(event, true))
   document.addEventListener("keyup", (event) => arrowControl(event, false))
+  const edge: number = 10
   for (let i = 0; i < numberOfAsteroids; i++) {
     let a: SpaceObject = createDefaultSpaceObject()
     a.shape = Shape.Asteroid
     a.name = "Asteroid #" + i
-    a.health = 5500
-    let size: number = rndi(10, 30)
-    a.size = {x: size, y: size}
+    a.health = rndi(7000, 9999)
+    a.size = rndiVec_mm(60, 120)
+    a.position = { x: rndi(edge, ctx.canvas.width-edge), y: rndi(edge, ctx.canvas.height-edge) }
     allSpaceObjects.push(a)
   }
   console.log(allSpaceObjects)
@@ -797,16 +831,18 @@ function nextFrame(ctx: any) {
     }
     // friction(so, 0.992)
     updateSpaceObject(so, screen, ctx)
+
+    // floor positions
+    // so.position = floor(so.position)
+    so.size = floor(so.size)
   }
   friction(myShip, 0.991)
 }
 
 
-const pic32lander = {
+export const pic32lander = {
   renderFrame: renderFrame,
   nextFrame: nextFrame,
   init: init,
   round2dec: round2dec,
 }
-
-export default pic32lander
