@@ -13,7 +13,7 @@ const ChatInput = ({ sendMessage }) => {
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       sendMessage(ref.current.value)
       cleanInput()
     }
@@ -37,8 +37,7 @@ const ChatInput = ({ sendMessage }) => {
           position: "fixed",
           bottom: 0,
           width: "100vw",
-        }}
-      >
+        }}>
         <BottomNavigation style={{ justifyContent: "left" }}>
           <Box
             style={{
@@ -49,8 +48,7 @@ const ChatInput = ({ sendMessage }) => {
               width: "100%",
 
               //borderRadius: "20px",
-            }}
-          >
+            }}>
             <Input
               style={{
                 //borderRadius: "5px",
@@ -59,25 +57,22 @@ const ChatInput = ({ sendMessage }) => {
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
-              placeholder="Send a message"
+              placeholder='Send a message'
               disableUnderline={true}
-              inputRef={ref}
-            ></Input>
+              inputRef={ref}></Input>
           </Box>
           <Stack
-            direction="row"
+            direction='row'
             spacing={2}
             style={{
               marginTop: "0.7em",
               marginBottom: "0.7em",
               marginRight: "0.7em",
-            }}
-          >
+            }}>
             <Button
-              variant="contained"
+              variant='contained'
               endIcon={<SendIcon />}
-              onClick={() => buttonSend()}
-            >
+              onClick={() => buttonSend()}>
               Send
             </Button>
           </Stack>

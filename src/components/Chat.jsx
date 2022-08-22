@@ -20,7 +20,6 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
       PaperProps={{
         sx: {
           //backgroundColor: "#000",
-          height: "100vh",
           right: "unset",
         },
       }}
