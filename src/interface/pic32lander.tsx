@@ -770,7 +770,7 @@ let allSpaceObjects: SpaceObject[] = []
 
 function init(cid: number, ctx: any) {
 
-  myShip.name = "Player" + cid
+  myShip.name = "Slayer" + cid
   myShip.shape = Shape.Ship
   myShip.health = 9000
   myShip.fuel = 400
