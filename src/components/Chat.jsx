@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react"
+import React, { useRef, useEffect } from "react"
 
 //Components
 import ChatInput from "./ChatInput"
@@ -7,8 +7,10 @@ import ChatMessages from "./ChatMessages"
 //Material UI
 import Grid from "@mui/material/Grid"
 import Drawer from "@mui/material/Drawer"
+import { useTheme } from "@mui/material/styles"
 
 const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
+  const theme = useTheme()
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -20,25 +22,30 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
       PaperProps={{
         sx: {
           //backgroundColor: "#000",
-          right: "unset",
+          right: 0,
+          width: "100%",
+          [theme.breakpoints.up("lg")]: {
+            width: "28%",
+          },
         },
       }}
-      variant='persistent'
-      anchor='right'
+      variant="persistent"
+      anchor="right"
       open={isOpen}
-      hideBackdrop>
+      hideBackdrop
+    >
       <Grid
         container
-        direction='row'
+        direction="row"
         alignContent={"flex-end"}
         style={{
-          width: "100vw",
           //minHeight: "100vh",
           marginBottom: "3.5em",
           marginTop: "2.8em",
           //backgroundColor: "#000",
           flex: "auto",
-        }}>
+        }}
+      >
         <ChatMessages messages={messages} clientId={clientId} />
       </Grid>
 

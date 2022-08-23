@@ -183,22 +183,25 @@ const MainPage = () => {
       <AppBar
         style={{ alignItems: "end", position: "fixed", zIndex: "10000" }}
         color={isOpen ? "default" : "transparent"}
-        elevation={0}>
+        elevation={0}
+      >
         <Stack
-          direction='row'
+          direction="row"
           spacing={2}
-          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}>
-          <Button variant='outlined' onClick={toggleDarkMode}>
+          style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
+        >
+          <Button variant="outlined" onClick={toggleDarkMode}>
             {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
           </Button>
-          <Button variant='outlined' onClick={() => setOpenDialog(true)}>
+          <Button variant="outlined" onClick={() => setOpenDialog(true)}>
             <SettingsIcon />
           </Button>
           <Button
-            variant='outlined'
+            variant="outlined"
             startIcon={<CommentIcon />}
             endIcon={isOpen ? <EastIcon /> : <WestIcon />}
-            onClick={toggleDrawer}></Button>
+            onClick={toggleDrawer}
+          ></Button>
         </Stack>
       </AppBar>
 
@@ -211,17 +214,15 @@ const MainPage = () => {
           bodyComponent={<SettingsMenu />}
         />
         <Grid item xs={12}>
-          <Game2D id='aster1' cid={clientId}></Game2D>
+          <Game2D id="aster1" cid={clientId}></Game2D>
         </Grid>
-        <Grid item xs={12}>
-          <Chat
-            messages={messages}
-            sendMessage={handleMessageSubmit}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            clientId={clientId}
-          />
-        </Grid>
+        <Chat
+          messages={messages}
+          sendMessage={handleMessageSubmit}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          clientId={clientId}
+        />
       </Grid>
     </>
   )
