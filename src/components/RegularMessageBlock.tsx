@@ -1,7 +1,6 @@
 import React from "react"
 
 //Material UI
-import { useTheme } from "@mui/material/styles"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"

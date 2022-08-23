@@ -2,7 +2,6 @@ import React from "react"
 
 //Material-UI
 import Dialog from "@mui/material/Dialog"
-import DialogTitle from "@mui/material/DialogTitle"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"

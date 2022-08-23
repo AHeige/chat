@@ -1,9 +1,5 @@
 import React from "react"
 
-//Material UI
-import Card from "@mui/material/Card"
-import CardContent from "@mui/material/CardContent"
-
 import { msgObj } from "../interface/iMessages"
 
 interface Props {

@@ -1,6 +1,6 @@
 import React, { useState, createContext } from "react"
 
-import { SettingsContextProps } from "../interface/iSettings"
+//import { SettingsContextProps } from "../interface/iSettings"
 
 const SettingsContext = createContext()
 

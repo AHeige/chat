@@ -4,7 +4,7 @@ import React, { useState, createContext } from "react"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import { CssBaseline } from "@mui/material"
 
-import { ThemeContextProps } from "../interface/iTheme"
+//import { ThemeContextProps } from "../interface/iTheme"
 
 const DarkModeContext = createContext()
 

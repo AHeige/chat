@@ -19,7 +19,6 @@ import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
 import AppBar from "@mui/material/AppBar"
 import TuneIcon from "@mui/icons-material/Tune"
-import Paper from "@mui/material/Paper"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
 
