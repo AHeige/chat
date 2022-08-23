@@ -164,33 +164,34 @@ function bounceSpaceObject(
   so: SpaceObject,
   screen: Vec2d,
   energyFactor: number = 1,
-  gap: number = 1
+  gap: number = 1,
+  damageDeltaFactor: number
 ) {
   if (so.position.x < gap) {
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = gap
     so.bounceCount++
-    so.damage = so.damage*0.1
+    so.damage = so.damage*damageDeltaFactor
   }
   if (so.position.x >= screen.x) {
     so.velocity.x = -so.velocity.x * energyFactor
     so.position.x = screen.x - gap
     so.bounceCount++
-    so.damage = so.damage*0.1
+    so.damage = so.damage*damageDeltaFactor
 
   }
   if (so.position.y < gap) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = gap
     so.bounceCount++
-    so.damage = so.damage*0.1
+    so.damage = so.damage*damageDeltaFactor
 
   }
   if (so.position.y >= screen.y) {
     so.velocity.y = -so.velocity.y * energyFactor
     so.position.y = screen.y - gap
     so.bounceCount++
-    so.damage = so.damage*0.1
+    so.damage = so.damage*damageDeltaFactor
 
   }
 }
@@ -713,13 +714,13 @@ function updateSpaceObject(so: SpaceObject, screen: Vec2d, ctx: any) {
     add(shot.position, shot.velocity)
     add(shot.velocity, shot.acceleration)
     shot.armedDelay--
-    bounceSpaceObject(shot, screen)
+    bounceSpaceObject(shot, screen, 1, 0, 0.7)
     alignHeadingToVelocity(shot)
     handleHittingShot(shot, ctx)
   }
   // decayShots(so, screen)
   decayDeadShots(so)
-  removeShotsAfterBounces(so, 1)
+  removeShotsAfterBounces(so, 2)
 }
 
 function handleCollisions(spaceObjects: SpaceObject[], ctx: any) {
@@ -764,7 +765,7 @@ function resetCollisions(spaceObjects: SpaceObject[]) {
 }
 
 
-const numberOfAsteroids: number = 80
+const numberOfAsteroids: number = 50
 let myShip: SpaceObject = createDefaultSpaceObject()
 let allSpaceObjects: SpaceObject[] = []
 
@@ -805,12 +806,39 @@ function init(cid: number, ctx: any) {
   console.log(allSpaceObjects)
 }
 
+function lowerLeft(ctx: any, padding: number) {
+  const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  return {x: padding, y: screen.y - padding}
+}
+
+function lowerRight(ctx: any, padding: number) {
+  const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  return {x: screen.x - padding, y: screen.y - padding}
+}
+
+function upperLeft(ctx: any, padding: number) {
+  const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  return {x: padding, y: padding}
+}
+
+function upperRight(ctx: any, padding: number) {
+  const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  return {x: screen.x - padding, y: padding}
+}
+
+function center(ctx: any) {
+  const screen: Vec2d = { x: ctx.canvas.width, y: ctx.canvas.height }
+  return {x: screen.x/2, y: screen.y/2}
+}
+
+let da: number = 0
 
 function renderFrame(ctx: any) {
   for (let so of allSpaceObjects) {
     drawSpaceObject(so, ctx)
   }
   resetCollisions(allSpaceObjects)
+  renderWatch(center(ctx), 100, ctx, da+=2)
 }
 
 function nextFrame(ctx: any) {
@@ -825,7 +853,7 @@ function nextFrame(ctx: any) {
 
   for (let so of allSpaceObjects) {
     if (bounce) {
-      bounceSpaceObject(so, screen, 0.9995)
+      bounceSpaceObject(so, screen, 0.9995, 0, 1)
     } else {
       wrapSpaceObject(so, screen)
     }
@@ -837,6 +865,45 @@ function nextFrame(ctx: any) {
     so.size = floor(so.size)
   }
   friction(myShip, 0.991)
+}
+
+function renderWatch(pos: Vec2d, size: number, ctx: any, da: number) {
+  // save current state of the context
+  ctx.save()
+  ctx.translate(pos.x, pos.y)
+  ctx.strokeStyle = '#f00'
+  ctx.lineWidth = 3
+  ctx.beginPath();
+  // ctx.moveTo(0, 0)
+  // ctx.lineTo(0, size)
+  // ctx.moveTo(0, 0)
+  // ctx.lineTo(size, 0)
+  // ctx.moveTo(0, 0)
+  // ctx.lineTo(0, -size)
+  // ctx.moveTo(0, 0)
+  // ctx.lineTo(-size, 0)
+
+  const stopx: number = 0.7
+  const stopy: number = 0.7
+  const startx: number = 0.4
+  const starty: number = 0.4
+  const da2: number = 3.5*da
+  const adt: number = 30
+  
+  ctx.moveTo(startx*size*Math.cos(degToRad(0)), starty*size*Math.sin(degToRad(0)))
+  for (let i = 0 - da; i < 360; i+=adt) {
+    ctx.moveTo(startx*size*Math.cos(degToRad(i)), starty*size*Math.sin(degToRad(i)))
+    ctx.lineTo(stopx*size*Math.cos(degToRad(i)), stopy*size*Math.sin(degToRad(i)))
+  }
+
+  ctx.moveTo(size*Math.cos(degToRad(da2)), size*Math.sin(degToRad(da2)))
+  ctx.arc(0, 0, size, degToRad(da2), (0.36 * Math.PI)+degToRad(da2));
+  // ctx.arc(0, 0, size/2, 0, 2 * Math.PI);
+  // ctx.arc(0, 0, size/20, 0, 2 * Math.PI);
+  // ctx.rect(-size/2, -size/2, size, size)
+  // ctx.rect(-size, -size, 2*size, 2*size)
+  ctx.stroke()
+  ctx.restore()
 }
 
 
