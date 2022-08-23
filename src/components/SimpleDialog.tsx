@@ -29,7 +29,7 @@ const SimpleDialog: React.FC<Props> = ({
   bodyComponent,
 }) => {
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onBackdropClick={() => handleClose()}>
       <List>
         <ListItem>
           <ListItemAvatar>
