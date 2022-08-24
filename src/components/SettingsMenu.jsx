@@ -15,6 +15,8 @@ import SpeakerNotesOffIcon from "@mui/icons-material/SpeakerNotesOff"
 import Slider from "@mui/material/Slider"
 import Divider from "@mui/material/Divider"
 import AspectRatioIcon from "@mui/icons-material/AspectRatio"
+import GridOffIcon from "@mui/icons-material/GridOff"
+import GridOnIcon from "@mui/icons-material/GridOn"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -23,8 +25,15 @@ import { SettingsContext } from "../contexts/settingsContext"
 const SettingsMenu = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
-  const { showChatLogs, toggleShowChatLogs, chatWidth } =
-    useContext(SettingsContext)
+  const {
+    showChatLogs,
+    toggleShowChatLogs,
+    chatWidth,
+    setChatWidth,
+    userDecision,
+    setUserDecision,
+    toggleUserDecision,
+  } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
     toggleDarkMode()
@@ -32,6 +41,15 @@ const SettingsMenu = () => {
 
   const handleToggleChatLogs = () => {
     toggleShowChatLogs()
+  }
+
+  const handleChangeChatWidth = (e, newValue) => {
+    setChatWidth(newValue)
+    setUserDecision(true)
+  }
+
+  const handleToggleUserDecision = () => {
+    toggleUserDecision()
   }
 
   return (
@@ -58,9 +76,21 @@ const SettingsMenu = () => {
         <ListItemText>Show Chat Logs</ListItemText>
         <Switch checked={showChatLogs} onChange={handleToggleChatLogs}></Switch>
       </ListItem>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+            {userDecision ? <GridOffIcon /> : <GridOnIcon />}
+          </Avatar>
+        </ListItemAvatar>
+        <ListItemText>Manual chat width</ListItemText>
+        <Switch
+          checked={userDecision}
+          onChange={handleToggleUserDecision}
+        ></Switch>
+      </ListItem>
       <ListItem style={{ marginBottom: 0, paddingBottom: 0 }}>
         <ListItemText style={{ marginBottom: 0, paddingBottom: 0 }}>
-          Chat Width: {chatWidth}
+          Chat Width: {`${chatWidth}%`}
         </ListItemText>
       </ListItem>
       <ListItem>
@@ -72,8 +102,9 @@ const SettingsMenu = () => {
         <Slider
           sx={{ width: "70%" }}
           size="small"
-          disabled
           value={chatWidth}
+          min={25}
+          onChange={handleChangeChatWidth}
         ></Slider>
       </ListItem>
     </List>
