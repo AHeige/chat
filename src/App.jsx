@@ -1,6 +1,9 @@
-import React from "react"
-// import ChatPage from "./pages/chatPage"
+import React, { useEffect, useContext, useRef } from "react"
+
+//Pages
 import MainPage from "./pages/MainPage"
+
+//Contexts
 import { DarkModeProvider } from "./contexts/themeContext"
 import { SettingsProvider } from "./contexts/settingsContext"
 

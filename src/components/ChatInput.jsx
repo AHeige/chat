@@ -9,7 +9,7 @@ import SendIcon from "@mui/icons-material/Send"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
 
-const ChatInput = ({ sendMessage }) => {
+const ChatInput = ({ sendMessage, chatWidth }) => {
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
@@ -36,8 +36,9 @@ const ChatInput = ({ sendMessage }) => {
         style={{
           position: "fixed",
           bottom: 0,
-          width: "100vw",
-        }}>
+          width: `${chatWidth}%`,
+        }}
+      >
         <BottomNavigation style={{ justifyContent: "left" }}>
           <Box
             style={{
@@ -48,7 +49,8 @@ const ChatInput = ({ sendMessage }) => {
               width: "100%",
 
               //borderRadius: "20px",
-            }}>
+            }}
+          >
             <Input
               style={{
                 //borderRadius: "5px",
@@ -57,22 +59,25 @@ const ChatInput = ({ sendMessage }) => {
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
-              placeholder='Send a message'
+              placeholder="Send a message"
               disableUnderline={true}
-              inputRef={ref}></Input>
+              inputRef={ref}
+            ></Input>
           </Box>
           <Stack
-            direction='row'
+            direction="row"
             spacing={2}
             style={{
               marginTop: "0.7em",
               marginBottom: "0.7em",
               marginRight: "0.7em",
-            }}>
+            }}
+          >
             <Button
-              variant='contained'
+              variant="contained"
               endIcon={<SendIcon />}
-              onClick={() => buttonSend()}>
+              onClick={() => buttonSend()}
+            >
               Send
             </Button>
           </Stack>

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useContext } from "react"
 
 //Components
 import ChatInput from "./ChatInput"
@@ -9,8 +9,12 @@ import Grid from "@mui/material/Grid"
 import Drawer from "@mui/material/Drawer"
 import { useTheme } from "@mui/material/styles"
 
+//Contexts
+import { SettingsContext } from "../contexts/settingsContext"
+
 const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
-  const theme = useTheme()
+  const { chatWidth } = useContext(SettingsContext)
+
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -23,10 +27,8 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
         sx: {
           //backgroundColor: "#000",
           right: 0,
-          width: "100%",
-          [theme.breakpoints.up("lg")]: {
-            width: "28%",
-          },
+          width: `${chatWidth}%`,
+          flexDirection: "column-reverse",
         },
       }}
       variant="persistent"
@@ -34,6 +36,8 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
       open={isOpen}
       hideBackdrop
     >
+      <Grid item style={{ height: "0px" }} ref={bottomRef} />
+
       <Grid
         container
         direction="row"
@@ -52,9 +56,8 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
       <ChatInput
         style={{ position: "fixed", bottom: "0" }}
         sendMessage={sendMessage}
+        chatWidth={chatWidth}
       />
-
-      <Grid item style={{ height: "0px" }} ref={bottomRef}></Grid>
     </Drawer>
   )
 }

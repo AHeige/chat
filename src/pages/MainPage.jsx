@@ -24,6 +24,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
+import { SettingsContext } from "../contexts/settingsContext"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
@@ -35,6 +36,12 @@ const MainPage = () => {
 
   //Context
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
+  const { handleResize } = useContext(SettingsContext)
+
+  useEffect(() => {
+    window.addEventListener("resize", () => handleResize(), false)
+    handleResize()
+  }, [])
 
   useEffect(() => {
     const host = new URL(window.location.href).hostname

@@ -12,6 +12,8 @@ import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
 import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes"
 import SpeakerNotesOffIcon from "@mui/icons-material/SpeakerNotesOff"
+import Slider from "@mui/material/Slider"
+import Divider from "@mui/material/Divider"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -20,7 +22,13 @@ import { SettingsContext } from "../contexts/settingsContext"
 const SettingsMenu = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
-  const { showChatLogs, toggleShowChatLogs } = useContext(SettingsContext)
+  const {
+    showChatLogs,
+    toggleShowChatLogs,
+    chatWidth,
+    setChatWidth,
+    setChatWidthManual,
+  } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
     toggleDarkMode()
@@ -32,6 +40,8 @@ const SettingsMenu = () => {
 
   return (
     <List sx={{ pt: 0 }}>
+      <ListItem>Theme Settings</ListItem>
+
       <ListItem>
         <ListItemAvatar>
           <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
@@ -41,6 +51,8 @@ const SettingsMenu = () => {
         <ListItemText>Dark (Side) Mode</ListItemText>
         <Switch checked={darkMode} onChange={handleToggleTheme}></Switch>
       </ListItem>
+      <Divider />
+      <ListItem>Chat Settings</ListItem>
       <ListItem>
         <ListItemAvatar>
           <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
