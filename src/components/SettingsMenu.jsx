@@ -14,6 +14,7 @@ import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes"
 import SpeakerNotesOffIcon from "@mui/icons-material/SpeakerNotesOff"
 import Slider from "@mui/material/Slider"
 import Divider from "@mui/material/Divider"
+import AspectRatioIcon from "@mui/icons-material/AspectRatio"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -22,13 +23,8 @@ import { SettingsContext } from "../contexts/settingsContext"
 const SettingsMenu = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
 
-  const {
-    showChatLogs,
-    toggleShowChatLogs,
-    chatWidth,
-    setChatWidth,
-    setChatWidthManual,
-  } = useContext(SettingsContext)
+  const { showChatLogs, toggleShowChatLogs, chatWidth } =
+    useContext(SettingsContext)
 
   const handleToggleTheme = () => {
     toggleDarkMode()
@@ -61,6 +57,24 @@ const SettingsMenu = () => {
         </ListItemAvatar>
         <ListItemText>Show Chat Logs</ListItemText>
         <Switch checked={showChatLogs} onChange={handleToggleChatLogs}></Switch>
+      </ListItem>
+      <ListItem style={{ marginBottom: 0, paddingBottom: 0 }}>
+        <ListItemText style={{ marginBottom: 0, paddingBottom: 0 }}>
+          Chat Width: {chatWidth}
+        </ListItemText>
+      </ListItem>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+            <AspectRatioIcon />
+          </Avatar>
+        </ListItemAvatar>
+        <Slider
+          sx={{ width: "70%" }}
+          size="small"
+          disabled
+          value={chatWidth}
+        ></Slider>
       </ListItem>
     </List>
   )

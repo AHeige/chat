@@ -7,7 +7,6 @@ import ChatMessages from "./ChatMessages"
 //Material UI
 import Grid from "@mui/material/Grid"
 import Drawer from "@mui/material/Drawer"
-import { useTheme } from "@mui/material/styles"
 
 //Contexts
 import { SettingsContext } from "../contexts/settingsContext"

@@ -24,7 +24,6 @@ import DarkModeIcon from "@mui/icons-material/DarkMode"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
-import { SettingsContext } from "../contexts/settingsContext"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
@@ -36,12 +35,6 @@ const MainPage = () => {
 
   //Context
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
-  const { handleResize } = useContext(SettingsContext)
-
-  useEffect(() => {
-    window.addEventListener("resize", () => handleResize(), false)
-    handleResize()
-  }, [])
 
   useEffect(() => {
     const host = new URL(window.location.href).hostname
@@ -211,14 +204,15 @@ const MainPage = () => {
         </Stack>
       </AppBar>
 
+      <SimpleDialog
+        open={openDialog}
+        handleClose={handleClose}
+        title={"Settings"}
+        titleIcon={<TuneIcon />}
+        bodyComponent={<SettingsMenu />}
+      />
+
       <Grid container sx={{ overflow: "hidden" }}>
-        <SimpleDialog
-          open={openDialog}
-          handleClose={handleClose}
-          title={"Settings"}
-          titleIcon={<TuneIcon />}
-          bodyComponent={<SettingsMenu />}
-        />
         <Grid item xs={12}>
           <Game2D id="aster1" cid={clientId}></Game2D>
         </Grid>

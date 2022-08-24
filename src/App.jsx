@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useRef } from "react"
+import React from "react"
 
 //Pages
 import MainPage from "./pages/MainPage"

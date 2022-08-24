@@ -7,21 +7,27 @@ const SettingsContext = createContext()
 const SettingsProvider = ({ children }) => {
   const [showChatLogs, setShowChatLogs] = useState(false)
   const [chatWidth, setChatWidth] = useState(28)
-  const [bodyWidth, setBodyWidth] = useState(window.innerWidth)
 
   const toggleShowChatLogs = () => {
     setShowChatLogs(!showChatLogs)
   }
 
   const handleResize = () => {
+    resizeChat()
+  }
+
+  const resizeChat = () => {
     if (window.innerWidth < 1200) {
-      if (chatWidth === 100) {
-        return
-      } else setChatWidth(100)
+      setChatWidth(100)
     } else if (window.innerWidth > 1200) {
       setChatWidth(28)
     }
   }
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize, false)
+    handleResize()
+  })
 
   return (
     <SettingsContext.Provider
@@ -30,8 +36,6 @@ const SettingsProvider = ({ children }) => {
         toggleShowChatLogs,
         chatWidth,
         setChatWidth,
-        setBodyWidth,
-        bodyWidth,
         handleResize,
       }}
     >
