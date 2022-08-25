@@ -1,14 +1,14 @@
-const express = require('express');
-const path = require('path');
-const app = express();
+const express = require("express")
+const path = require("path")
+const app = express()
 
-app.use(express.static(path.join(__dirname, '../build')));
+app.use(express.static(path.join(__dirname, "../build")))
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../build', 'index.html'));
-});
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "../build", "index.html"))
+})
 
-app.listen(80);
+app.listen(80)
 
 const ws = require("ws")
 const PORT = 5678
@@ -151,7 +151,7 @@ function addUser(cid, socket, scid) {
       systemMessage: true,
       rxDate: new Date(),
       srvAck: true,
-      user: "User #" + cid,
+      user: "Player #" + cid,
       text: "<joined the chat>",
       userJoined: true,
       cid: cid,
@@ -182,7 +182,7 @@ function init() {
         parsedObject.rxDate = new Date()
         parsedObject.srvAckMid = parsedObject.mid
         parsedObject.srvAck = true
-        parsedObject.user = "User #" + parsedObject.cid
+        parsedObject.user = "Player #" + parsedObject.cid
         broadcastMessage(parsedObject)
       }
     })
@@ -192,7 +192,7 @@ function init() {
         systemMessage: true,
         rxDate: new Date(),
         srvAck: true,
-        user: "User #" + cid,
+        user: "Player #" + cid,
         text: "<Logged out>",
         userLeft: true,
         cid: cid,
