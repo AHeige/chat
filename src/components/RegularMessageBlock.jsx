@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useRef } from "react"
+import React, { MutableRefObject, useRef, useContext } from "react"
 
 //Material UI
 import Card from "@mui/material/Card"
@@ -6,15 +6,14 @@ import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
 import Avatar from "@mui/material/Avatar"
 
+//Interface
 import { msgObj } from "../interface/iMessages"
 
-interface Props {
-  msgObj: msgObj
-  clientId: number
-}
+import { SettingsContext } from "../contexts/settingsContext"
 
-const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
-  const cardRef: MutableRefObject<HTMLDivElement | null> = useRef(null)
+const RegularMessageBlock = ({ msgObj, clientId }) => {
+  const { showMyAvatar, toggleShowMyAvatar } = useContext(SettingsContext)
+  const cardRef = useRef(null)
   const myMessage = msgObj.cid === clientId
 
   const messageDate = new Date(msgObj.rxDate).toLocaleTimeString("sv-SV")
@@ -26,9 +25,9 @@ const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
   }
 
   const userColor = () => {
-    const color: any = msgObj.cid
+    const color = msgObj.cid
 
-    const colorPicker: any = {
+    const colorPicker = {
       1: "#F6A993",
       2: "#829C86",
       3: "#FBDEBB",
@@ -58,15 +57,15 @@ const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
           msgObj.user + " - " + (msgObj.srvAck ? "" : "*") + messageDate
         }
       />
-      {!myMessage && (
+      {(showMyAvatar || !myMessage) && (
         <Avatar
           sx={{
-            float: "left",
+            float: myMessage ? "right" : "left",
             width: avatarSettings.size,
             height: avatarSettings.size,
             marginTop: avatarSettings.margin,
-            marginRight: avatarSettings.margin,
-
+            marginRight: myMessage ? "" : avatarSettings.margin,
+            marginLeft: myMessage ? avatarSettings.margin : "",
             fontSize: avatarSettings.fontSize,
             bgcolor: userColor(),
             color: "#fff",
@@ -76,6 +75,7 @@ const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
           {Array.from(msgObj.user)[msgObj.user.length - 1]}
         </Avatar>
       )}
+
       <Card
         style={{
           width: "fit-content",
@@ -91,7 +91,7 @@ const RegularMessageBlock: React.FC<Props> = ({ msgObj, clientId }) => {
           ref={cardRef}
           style={{ width: "fit-content", padding: "10px" }}
         >
-          <span>{msgObj.text}</span>
+          <span style={{ lineBreak: "anywhere" }}>{msgObj.text}</span>
         </CardContent>
       </Card>
     </>

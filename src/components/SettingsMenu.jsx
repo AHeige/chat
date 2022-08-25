@@ -17,6 +17,8 @@ import Divider from "@mui/material/Divider"
 import AspectRatioIcon from "@mui/icons-material/AspectRatio"
 import GridOffIcon from "@mui/icons-material/GridOff"
 import GridOnIcon from "@mui/icons-material/GridOn"
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"
+import NoAccountsIcon from "@mui/icons-material/NoAccounts"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -33,6 +35,9 @@ const SettingsMenu = () => {
     userDecision,
     setUserDecision,
     toggleUserDecision,
+
+    showMyAvatar,
+    toggleShowMyAvatar,
   } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
@@ -50,6 +55,10 @@ const SettingsMenu = () => {
 
   const handleToggleUserDecision = () => {
     toggleUserDecision()
+  }
+
+  const handleToggleShowMyAvatar = () => {
+    toggleShowMyAvatar()
   }
 
   return (
@@ -73,8 +82,20 @@ const SettingsMenu = () => {
             {showChatLogs ? <SpeakerNotesIcon /> : <SpeakerNotesOffIcon />}
           </Avatar>
         </ListItemAvatar>
-        <ListItemText>Show Chat Logs</ListItemText>
+        <ListItemText>Show chat logs</ListItemText>
         <Switch checked={showChatLogs} onChange={handleToggleChatLogs}></Switch>
+      </ListItem>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+            {showMyAvatar ? <AccountCircleIcon /> : <NoAccountsIcon />}
+          </Avatar>
+        </ListItemAvatar>
+        <ListItemText>Show my avatar</ListItemText>
+        <Switch
+          checked={showMyAvatar}
+          onChange={handleToggleShowMyAvatar}
+        ></Switch>
       </ListItem>
       <ListItem>
         <ListItemAvatar>
@@ -90,7 +111,7 @@ const SettingsMenu = () => {
       </ListItem>
       <ListItem style={{ marginBottom: 0, paddingBottom: 0 }}>
         <ListItemText style={{ marginBottom: 0, paddingBottom: 0 }}>
-          Chat Width: {`${chatWidth}%`}
+          Chat width: {`${chatWidth}%`}
         </ListItemText>
       </ListItem>
       <ListItem>

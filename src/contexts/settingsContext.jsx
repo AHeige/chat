@@ -10,6 +10,7 @@ const SettingsProvider = ({ children }) => {
   const [showChatLogs, setShowChatLogs] = useState(false)
   const [chatWidth, setChatWidth] = useState(28)
   const [userDecision, setUserDecision] = useState(false)
+  const [showMyAvatar, setShowMyAvatar] = useState(false)
 
   const toggleShowChatLogs = () => {
     setShowChatLogs((previous) => !previous)
@@ -17,6 +18,10 @@ const SettingsProvider = ({ children }) => {
 
   const toggleUserDecision = () => {
     setUserDecision((previous) => !previous)
+  }
+
+  const toggleShowMyAvatar = () => {
+    setShowMyAvatar((previous) => !previous)
   }
 
   const handleResize = () => {
@@ -51,6 +56,8 @@ const SettingsProvider = ({ children }) => {
         toggleUserDecision,
         userDecision,
         setUserDecision,
+        toggleShowMyAvatar,
+        showMyAvatar,
       }}
     >
       {children}
