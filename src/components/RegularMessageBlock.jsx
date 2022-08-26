@@ -40,8 +40,6 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
       10: "#6A518E",
     }
 
-    console.log(color)
-
     return colorPicker[color > 10 ? 10 : color]
   }
 

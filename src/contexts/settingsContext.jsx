@@ -1,4 +1,5 @@
 import React, { useState, createContext, useEffect } from "react"
+import Cookies from "js-cookie"
 
 //import { SettingsContextProps } from "../interface/iSettings"
 
@@ -11,6 +12,12 @@ const SettingsProvider = ({ children }) => {
   const [chatWidth, setChatWidth] = useState(28)
   const [userDecision, setUserDecision] = useState(false)
   const [showMyAvatar, setShowMyAvatar] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [temporaryName, setTemporaryName] = useState("")
+
+  useEffect(() => {
+    setUserName(Cookies.get("userName"))
+  }, [])
 
   const toggleShowChatLogs = () => {
     setShowChatLogs((previous) => !previous)
@@ -58,6 +65,10 @@ const SettingsProvider = ({ children }) => {
         setUserDecision,
         toggleShowMyAvatar,
         showMyAvatar,
+        userName,
+        setUserName,
+        temporaryName,
+        setTemporaryName,
       }}
     >
       {children}

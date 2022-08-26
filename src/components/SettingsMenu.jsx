@@ -1,4 +1,5 @@
-import React, { useContext } from "react"
+import React, { useContext, useRef } from "react"
+import Cookies from "js-cookie"
 
 //Material UI
 import List from "@mui/material/List"
@@ -19,6 +20,8 @@ import GridOffIcon from "@mui/icons-material/GridOff"
 import GridOnIcon from "@mui/icons-material/GridOn"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import NoAccountsIcon from "@mui/icons-material/NoAccounts"
+import BadgeIcon from "@mui/icons-material/Badge"
+import Input from "@mui/material/Input"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -26,6 +29,7 @@ import { SettingsContext } from "../contexts/settingsContext"
 
 const SettingsMenu = () => {
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
+  const ref = useRef(null)
 
   const {
     showChatLogs,
@@ -35,9 +39,11 @@ const SettingsMenu = () => {
     userDecision,
     setUserDecision,
     toggleUserDecision,
-
     showMyAvatar,
     toggleShowMyAvatar,
+    userName,
+    setUserName,
+    temporaryName,
   } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
@@ -61,10 +67,35 @@ const SettingsMenu = () => {
     toggleShowMyAvatar()
   }
 
+  const handleChangeName = (e) => {
+    console.log(ref.current.value)
+    if (e.key === "Enter" && !e.shiftKey) {
+      setUserName(ref.current.value)
+      Cookies.set("userName", ref.current.value, { expires: 2 })
+    }
+  }
+
   return (
     <List sx={{ pt: 0 }}>
-      <ListItem>Theme Settings</ListItem>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+            <BadgeIcon />
+          </Avatar>
+        </ListItemAvatar>
+        Username:
+        <Input
+          style={{
+            marginLeft: "1em",
+          }}
+          onKeyDown={(e) => handleChangeName(e)}
+          placeholder={userName ? userName : temporaryName}
+          inputRef={ref}
+        ></Input>
+      </ListItem>
 
+      <Divider />
+      <ListItem>Theme Settings</ListItem>
       <ListItem>
         <ListItemAvatar>
           <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>

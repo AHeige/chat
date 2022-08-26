@@ -168,7 +168,6 @@ function init() {
 
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
-
       if (parsedObject.clientInit === true) {
         cid = getLowestAvailableCid()
         sendCidRequestMessage(ws, cid, scid)
@@ -182,7 +181,7 @@ function init() {
         parsedObject.rxDate = new Date()
         parsedObject.srvAckMid = parsedObject.mid
         parsedObject.srvAck = true
-        parsedObject.user = "Player #" + parsedObject.cid
+        //parsedObject.user = "Player #" + parsedObject.cid
         broadcastMessage(parsedObject)
       }
     })

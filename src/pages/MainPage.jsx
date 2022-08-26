@@ -24,6 +24,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
+import { SettingsContext } from "../contexts/settingsContext"
 
 const MainPage = () => {
   const [messages, setMessages] = useState([])
@@ -32,6 +33,8 @@ const MainPage = () => {
   const [socketLost, setSocketLost] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
+  const { userName, temporaryName, setTemporaryName } =
+    useContext(SettingsContext)
 
   //Context
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext)
@@ -86,6 +89,7 @@ const MainPage = () => {
         })
         console.log("initMessage")
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
+        setTemporaryName("Player #" + getCidFromCookie())
         sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
       }
 
@@ -154,15 +158,15 @@ const MainPage = () => {
     }
 
     const messageObject = {
-      text: message,
-      type: 1,
-      mid: messages.length,
-      srvAck: false,
-      rxDate: new Date(),
       cid: clientId,
-      user: "(Me #" + clientId + ")",
-      thisIsMe: true,
       color: textColor[colorPicker()],
+      mid: messages.length,
+      rxDate: new Date(),
+      srvAck: false,
+      text: message,
+      thisIsMe: true,
+      type: 1,
+      user: userName ? userName : temporaryName,
     }
 
     addMessage(messageObject)
