@@ -63,7 +63,7 @@ const MainPage = () => {
       let msgObj = JSON.parse(event.data)
       if (msgObj.cidResponse) {
         console.log("cidResponse")
-        Cookies.set("cid", msgObj.cidOption, { expires: 2 })
+        Cookies.set("cid", msgObj.cidOption, { expires: 365 })
         setClientId(() => {
           return getCidFromCookie()
         })
@@ -184,13 +184,18 @@ const MainPage = () => {
   return (
     <>
       <AppBar
-        style={{ alignItems: "end", position: "fixed", zIndex: "10000" }}
+        style={{
+          alignItems: "end",
+          position: "fixed",
+          zIndex: "10000",
+          marginRight: "0.5em",
+        }}
         color={isOpen ? "default" : "transparent"}
         elevation={0}
       >
         <Stack
           direction="row"
-          spacing={2}
+          spacing={1}
           style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
         >
           <Button variant="outlined" onClick={toggleDarkMode}>

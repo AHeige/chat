@@ -89,7 +89,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
           ref={cardRef}
           style={{ width: "fit-content", padding: "10px" }}
         >
-          <span style={{ lineBreak: "anywhere" }}>{msgObj.text}</span>
+          <span style={{ wordBreak: "break-word" }}>{msgObj.text}</span>
         </CardContent>
       </Card>
     </>

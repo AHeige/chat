@@ -71,7 +71,7 @@ const SettingsMenu = () => {
     console.log(ref.current.value)
     if (e.key === "Enter" && !e.shiftKey) {
       setUserName(ref.current.value)
-      Cookies.set("userName", ref.current.value, { expires: 2 })
+      Cookies.set("userName", ref.current.value, { expires: 365 })
     }
   }
 
