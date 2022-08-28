@@ -33,7 +33,7 @@ const MainPage = () => {
   const [socketLost, setSocketLost] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
-  const { userName, temporaryName, setTemporaryName } =
+  const { userName, temporaryName, setTemporaryName, startWidthChatOpen } =
     useContext(SettingsContext)
 
   //Context
@@ -49,6 +49,10 @@ const MainPage = () => {
   useEffect(() => {
     console.log("messages updated ", messages)
   }, [messages])
+
+  useEffect(() => {
+    setIsOpen(startWidthChatOpen)
+  }, [startWidthChatOpen])
 
   const getCidFromCookie = () => {
     let cid = parseInt(Cookies.get("cid"))
@@ -90,6 +94,7 @@ const MainPage = () => {
         console.log("initMessage")
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
         setTemporaryName("Player #" + getCidFromCookie())
+        msgObj.user = "Player #" + getCidFromCookie()
         sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
       }
 
@@ -166,7 +171,7 @@ const MainPage = () => {
       text: message,
       thisIsMe: true,
       type: 1,
-      user: userName ? userName : temporaryName,
+      user: userName ? userName : "Player #" + getCidFromCookie(),
     }
 
     addMessage(messageObject)

@@ -1,23 +1,65 @@
-import React, { useState, createContext, useEffect } from "react"
+import React, { useState, createContext, useEffect, useContext } from "react"
 import Cookies from "js-cookie"
 
-//import { SettingsContextProps } from "../interface/iSettings"
+import { DarkModeContext } from "./themeContext"
 
 const SettingsContext = createContext()
-
-const removeEventListening = () => {}
 
 const SettingsProvider = ({ children }) => {
   const [showChatLogs, setShowChatLogs] = useState(false)
   const [chatWidth, setChatWidth] = useState(28)
   const [userDecision, setUserDecision] = useState(false)
+  const [chatWidthManual, setChatWidthManual] = useState()
   const [showMyAvatar, setShowMyAvatar] = useState(false)
   const [userName, setUserName] = useState("")
   const [temporaryName, setTemporaryName] = useState("")
+  const [startWidthChatOpen, setStartWidthChatOpen] = useState(false)
+  const [init, setInit] = useState(true)
+  const { darkMode, setDarkMode } = useContext(DarkModeContext)
 
   useEffect(() => {
-    setUserName(Cookies.get("userName"))
-  }, [])
+    if (init === true && !Cookies.get("settings")) {
+      //on first render and no cookies (do nothing, using the states provided above)
+      handleResize()
+      setInit(false)
+    } else if (init === true && Cookies.get("settings")) {
+      //Take the cookie and set the (united :P) states
+      const cookieSettings = JSON.parse(Cookies.get("settings"))
+
+      setInit(false)
+      setShowChatLogs(cookieSettings.showChatLogs)
+      setChatWidth(cookieSettings.chatWidth)
+      setUserDecision(cookieSettings.userDecision)
+      setShowMyAvatar(cookieSettings.showMyAvatar)
+      setUserName(cookieSettings.userName)
+      setDarkMode(cookieSettings.darkMode)
+      setChatWidthManual(cookieSettings.chatWidthManual)
+      setStartWidthChatOpen(cookieSettings.startWidthChatOpen)
+    }
+    if (init === false) {
+      //Set the cookie with the settings because its not first render (init is false)
+      const settingsObject = {
+        userName: userName,
+        darkMode: darkMode,
+        showChatLogs: showChatLogs,
+        showMyAvatar: showMyAvatar,
+        userDecision: userDecision,
+        chatWidth: chatWidth,
+        chatWidthManual: chatWidthManual,
+        startWidthChatOpen: startWidthChatOpen,
+      }
+      Cookies.set("settings", JSON.stringify(settingsObject), { expires: 365 })
+    }
+  }, [
+    userName,
+    darkMode,
+    showChatLogs,
+    showMyAvatar,
+    userDecision,
+    chatWidth,
+    chatWidthManual,
+    startWidthChatOpen,
+  ])
 
   const toggleShowChatLogs = () => {
     setShowChatLogs((previous) => !previous)
@@ -25,10 +67,24 @@ const SettingsProvider = ({ children }) => {
 
   const toggleUserDecision = () => {
     setUserDecision((previous) => !previous)
+    if (!userDecision === true) {
+      const chatWidthCookie = JSON.parse(Cookies.get("settings"))
+      console.log(chatWidthCookie.chatWidthManual)
+      console.log(chatWidthCookie.chatWidth)
+      setChatWidth(
+        chatWidthCookie.chatWidthManual
+          ? chatWidthCookie.chatWidthManual
+          : chatWidthCookie.chatWidth
+      )
+    } else handleResize()
   }
 
   const toggleShowMyAvatar = () => {
     setShowMyAvatar((previous) => !previous)
+  }
+
+  const toggleStartWidthChatOpen = () => {
+    setStartWidthChatOpen((previous) => !previous)
   }
 
   const handleResize = () => {
@@ -45,7 +101,7 @@ const SettingsProvider = ({ children }) => {
     }
     if (userDecision === false) {
       window.addEventListener("resize", handleResize, false)
-      handleResize()
+
       return () => {
         window.removeEventListener("resize", handleResize, false)
       }
@@ -69,6 +125,9 @@ const SettingsProvider = ({ children }) => {
         setUserName,
         temporaryName,
         setTemporaryName,
+        setChatWidthManual,
+        toggleStartWidthChatOpen,
+        startWidthChatOpen,
       }}
     >
       {children}

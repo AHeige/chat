@@ -22,6 +22,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import NoAccountsIcon from "@mui/icons-material/NoAccounts"
 import BadgeIcon from "@mui/icons-material/Badge"
 import Input from "@mui/material/Input"
+import ContentPasteOffIcon from "@mui/icons-material/ContentPasteOff"
+import AssignmentIcon from "@mui/icons-material/Assignment"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -44,6 +46,9 @@ const SettingsMenu = () => {
     userName,
     setUserName,
     temporaryName,
+    setChatWidthManual,
+    startWidthChatOpen,
+    toggleStartWidthChatOpen,
   } = useContext(SettingsContext)
 
   const handleToggleTheme = () => {
@@ -57,6 +62,7 @@ const SettingsMenu = () => {
   const handleChangeChatWidth = (e, newValue) => {
     setChatWidth(newValue)
     setUserDecision(true)
+    setChatWidthManual(newValue)
   }
 
   const handleToggleUserDecision = () => {
@@ -71,8 +77,11 @@ const SettingsMenu = () => {
     console.log(ref.current.value)
     if (e.key === "Enter" && !e.shiftKey) {
       setUserName(ref.current.value)
-      Cookies.set("userName", ref.current.value, { expires: 365 })
     }
+  }
+
+  const handleStartWidthChatOpenToggle = () => {
+    toggleStartWidthChatOpen()
   }
 
   return (
@@ -110,7 +119,23 @@ const SettingsMenu = () => {
       <ListItem>
         <ListItemAvatar>
           <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
-            {showChatLogs ? <SpeakerNotesIcon /> : <SpeakerNotesOffIcon />}
+            {startWidthChatOpen ? (
+              <SpeakerNotesIcon />
+            ) : (
+              <SpeakerNotesOffIcon />
+            )}
+          </Avatar>
+        </ListItemAvatar>
+        <ListItemText>Chat open on start</ListItemText>
+        <Switch
+          checked={startWidthChatOpen}
+          onChange={handleStartWidthChatOpenToggle}
+        ></Switch>
+      </ListItem>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+            {showChatLogs ? <AssignmentIcon /> : <ContentPasteOffIcon />}
           </Avatar>
         </ListItemAvatar>
         <ListItemText>Show chat logs</ListItemText>
@@ -156,7 +181,7 @@ const SettingsMenu = () => {
           size="small"
           value={chatWidth}
           min={25}
-          onChange={handleChangeChatWidth}
+          onChange={(e, newValue) => handleChangeChatWidth(e, newValue)}
         ></Slider>
       </ListItem>
     </List>

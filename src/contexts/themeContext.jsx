@@ -1,4 +1,5 @@
-import React, { useState, createContext } from "react"
+import React, { useState, createContext, useEffect } from "react"
+import Cookies from "js-cookie"
 
 //Material-ui
 import { ThemeProvider, createTheme } from "@mui/material/styles"
@@ -25,12 +26,13 @@ const lightTheme = createTheme({
 
 const DarkModeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(true)
+
   const toggleDarkMode = () => {
     setDarkMode((previous) => !previous)
   }
 
   return (
-    <DarkModeContext.Provider value={{ darkMode, toggleDarkMode }}>
+    <DarkModeContext.Provider value={{ darkMode, toggleDarkMode, setDarkMode }}>
       <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
         <CssBaseline />
         {children}
