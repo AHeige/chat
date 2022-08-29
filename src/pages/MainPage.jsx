@@ -228,19 +228,16 @@ const MainPage = () => {
 
           <Button
             variant="outlined"
-            startIcon={<CommentIcon />}
-            endIcon={
-              isOpen ? (
-                <EastIcon />
-              ) : (
-                <Badge
-                  badgeContent={newMessages.length}
-                  color="primary"
-                ></Badge>
-              )
-            }
+            endIcon={isOpen && <EastIcon />}
             onClick={toggleDrawer}
-          ></Button>
+          >
+            <CommentIcon />
+            <Badge
+              sx={{ marginBottom: "1.2em", marginLeft: "0.5em" }}
+              badgeContent={!isOpen ? newMessages.length : null}
+              color="warning"
+            ></Badge>
+          </Button>
         </Stack>
       </AppBar>
 
