@@ -21,6 +21,7 @@ import AppBar from "@mui/material/AppBar"
 import TuneIcon from "@mui/icons-material/Tune"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
+import Badge from "@mui/material/Badge"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -33,6 +34,8 @@ const MainPage = () => {
   const [socketLost, setSocketLost] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
+  const [newMessages, setNewMessages] = useState([])
+  const [pageTitle, setPageTitle] = useState(document.title)
   const { userName, temporaryName, setTemporaryName, startWidthChatOpen } =
     useContext(SettingsContext)
 
@@ -101,6 +104,7 @@ const MainPage = () => {
       msgObj.mid = messages.length
       removeAckMessage(msgObj)
       addMessage(msgObj)
+      notification(msgObj)
     })
 
     socket.addEventListener("close", (event) => {
@@ -183,8 +187,20 @@ const MainPage = () => {
   }
 
   const toggleDrawer = () => {
-    setIsOpen(!isOpen)
+    setIsOpen((previous) => !previous)
   }
+
+  const notification = (message) => {
+    if (!message.systemMessage) {
+      setNewMessages((previous) => {
+        return [...previous, message]
+      })
+    }
+  }
+
+  useEffect(() => {
+    setNewMessages([])
+  }, [isOpen])
 
   return (
     <>
@@ -209,10 +225,20 @@ const MainPage = () => {
           <Button variant="outlined" onClick={() => setOpenDialog(true)}>
             <SettingsIcon />
           </Button>
+
           <Button
             variant="outlined"
             startIcon={<CommentIcon />}
-            endIcon={isOpen ? <EastIcon /> : <WestIcon />}
+            endIcon={
+              isOpen ? (
+                <EastIcon />
+              ) : (
+                <Badge
+                  badgeContent={newMessages.length}
+                  color="primary"
+                ></Badge>
+              )
+            }
             onClick={toggleDrawer}
           ></Button>
         </Stack>
