@@ -25,7 +25,6 @@ const SettingsProvider = ({ children }) => {
     } else if (init === true && Cookies.get("settings")) {
       //Take the cookie and set the (united :P) states
       const cookieSettings = JSON.parse(Cookies.get("settings"))
-
       setInit(false)
       setShowChatLogs(cookieSettings.showChatLogs)
       setChatWidth(cookieSettings.chatWidth)

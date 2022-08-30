@@ -1,4 +1,10 @@
-import React, { MutableRefObject, useRef, useContext } from "react"
+import React, {
+  MutableRefObject,
+  useRef,
+  useContext,
+  useState,
+  useEffect,
+} from "react"
 
 //Material UI
 import Card from "@mui/material/Card"
@@ -6,13 +12,19 @@ import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
 import Avatar from "@mui/material/Avatar"
 
+//Reactions
+import { FacebookSelector, FacebookCounter } from "@charkour/react-reactions"
+
 //Interface
 import { msgObj } from "../interface/iMessages"
 
 import { SettingsContext } from "../contexts/settingsContext"
 
 const RegularMessageBlock = ({ msgObj, clientId }) => {
-  const { showMyAvatar, toggleShowMyAvatar } = useContext(SettingsContext)
+  const { showMyAvatar, toggleShowMyAvatar, userName, temporaryName } =
+    useContext(SettingsContext)
+  const [showReactionBar, setShowReactionBar] = useState(false)
+  const [reaction, setReaction] = useState([])
   const cardRef = useRef(null)
   const myMessage = msgObj.cid === clientId
 
@@ -43,8 +55,48 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
     return colorPicker[color > 10 ? 10 : color]
   }
 
+  const handleOnHover = (set) => {
+    setShowReactionBar(set)
+  }
+
+  const handleReaction = (value) => {
+    const reactionObj = {
+      emoji: value,
+      by: userName ? userName : temporaryName,
+    }
+
+    console.log(reactionObj)
+
+    //Enable if more reactions from one user
+    /*     setReaction((previous) => {
+      return [...previous, reactionObj]
+    }) */
+    setReaction([reactionObj])
+    handleOnHover(false)
+  }
+
+  const reactionElement = () => {
+    if (reaction.length > 0) {
+      return (
+        <span
+          style={{
+            float: myMessage ? "right" : "left",
+          }}
+        >
+          <FacebookCounter
+            counters={reaction}
+            user={userName ? userName : temporaryName}
+          />
+        </span>
+      )
+    }
+  }
+
   return (
-    <>
+    <span
+      onMouseOver={() => handleOnHover(true)}
+      onMouseLeave={() => handleOnHover(false)}
+    >
       <CardHeader
         sx={{
           padding: "0",
@@ -55,6 +107,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
           msgObj.user + " - " + (msgObj.srvAck ? "" : "*") + messageDate
         }
       />
+
       {(showMyAvatar || !myMessage) && (
         <Avatar
           sx={{
@@ -91,8 +144,27 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
         >
           <span style={{ wordBreak: "break-word" }}>{msgObj.text}</span>
         </CardContent>
+        {showReactionBar && (
+          <span
+            style={{
+              right: myMessage ? 0 : "",
+              display: "flex",
+
+              zIndex: "100",
+              position: "absolute",
+            }}
+          >
+            <FacebookSelector
+              iconSize={30}
+              style={{ width: "fit-content" }}
+              onSelect={(value) => handleReaction(value)}
+            />
+          </span>
+        )}
       </Card>
-    </>
+
+      {reaction && reactionElement()}
+    </span>
   )
 }
 

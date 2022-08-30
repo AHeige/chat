@@ -70,7 +70,9 @@ const MainPage = () => {
       let msgObj = JSON.parse(event.data)
       if (msgObj.cidResponse) {
         console.log("cidResponse")
+
         Cookies.set("cid", msgObj.cidOption, { expires: 365 })
+
         setClientId(() => {
           return getCidFromCookie()
         })
@@ -96,8 +98,9 @@ const MainPage = () => {
         })
         console.log("initMessage")
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
-        setTemporaryName("Player #" + getCidFromCookie())
+
         msgObj.user = "Player #" + getCidFromCookie()
+        Cookies.set("temporaryName", msgObj.user, { expires: 365 })
         sendWith(socket, { cid: getCidFromCookie(), haveCookieCid: true })
       }
 
@@ -105,6 +108,7 @@ const MainPage = () => {
       removeAckMessage(msgObj)
       addMessage(msgObj)
       notification(msgObj)
+      setTemporaryName("Player #" + getCidFromCookie())
     })
 
     socket.addEventListener("close", (event) => {
