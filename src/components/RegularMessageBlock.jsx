@@ -63,25 +63,22 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
     const reactionObj = {
       emoji: value,
       by: userName ? userName : temporaryName,
-      message: msgObj,
     }
 
-    msgObj.emoji = value
-    msgObj.by = userName ? userName : temporaryName
-
-    console.log(reactionObj)
+    msgObj.reactions.push(reactionObj)
+    msgObj.newReaction = true
 
     //Enable if more reactions from one user
     /*     setReaction((previous) => {
       return [...previous, reactionObj]
     }) */
-    setReaction([reactionObj])
+
     handleReaction(msgObj)
     handleOnHover(false)
   }
 
   const reactionElement = () => {
-    if (reaction.length > 0) {
+    if (msgObj.reactions) {
       return (
         <span
           style={{
@@ -89,7 +86,7 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
           }}
         >
           <FacebookCounter
-            counters={reaction}
+            counters={msgObj.reactions}
             user={userName ? userName : temporaryName}
           />
         </span>

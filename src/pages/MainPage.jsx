@@ -41,6 +41,7 @@ const MainPage = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [newMessages, setNewMessages] = useState([])
   const [notifyOthers, setNotifyOthers] = useState(false)
+  const [newReaction, setNewReaction] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -72,10 +73,9 @@ const MainPage = () => {
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
-
-      if (msgObj.emoji) {
-        console.log("reaction from server: ", msgObj)
-        addEmoji(msgObj)
+      console.log("msgObj ", msgObj)
+      if (msgObj.newReaction) {
+        setNewReaction(msgObj)
         return
       }
 
@@ -101,7 +101,6 @@ const MainPage = () => {
       }
 
       if (msgObj.initMessage) {
-        console.log(msgObj)
         msgObj.messageHistory.forEach((msg) => {
           addMessage(msg)
         })
@@ -132,6 +131,25 @@ const MainPage = () => {
   }
 
   useEffect(() => {
+    if (newReaction) {
+      const foundMessage = messages.find(
+        (old) => old.srvAckMid === newReaction.srvAckMid
+      )
+      const update = messages.map((msg) => {
+        if (msg.srvAckMid === foundMessage.srvAckMid) {
+          return { ...msg, reactions: newReaction.reactions }
+        }
+        return msg
+      })
+
+      setMessages(update)
+      if (newReaction.cid !== clientId) {
+        playSound()
+      }
+    }
+  }, [newReaction, setNewReaction])
+
+  useEffect(() => {
     if (newMessages.length > 0) {
       const latestMessage = newMessages[newMessages.length - 1]
 
@@ -156,19 +174,6 @@ const MainPage = () => {
         return !(old.cid === msg.cid && old.mid === msg.srvAckMid)
       })
     })
-  }
-
-  const addEmoji = (msg) => {
-    setMessages((oldMessages) => {
-      return oldMessages.filter((old) => {
-        return !(old.cid === msg.cid && old.mid === msg.srvAckMid)
-      })
-    })
-    /* setMessages((oldMessages) => {
-      return oldMessages.filter((old) => {
-        return (old.mid === msg.mid && old.mid === msg.srvAckMid)
-      })
-    }) */
   }
 
   const sendMessage = (messageObject) => {
@@ -212,6 +217,8 @@ const MainPage = () => {
     }
 
     const messageObject = {
+      reactions: [],
+      newReaction: false,
       cid: clientId,
       color: textColor[colorPicker()],
       mid: messages.length,
@@ -244,7 +251,6 @@ const MainPage = () => {
   }, [isOpen])
 
   const handleReaction = (reaction) => {
-    console.log("handling reaction: ", reaction)
     sock.send(JSON.stringify(reaction))
   }
 

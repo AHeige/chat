@@ -53,15 +53,9 @@ function getLowestAvailableServerCid() {
 let broadcastedMessagesList = []
 
 function broadcastMessage(message, cidToSkip = -1) {
-  if (message.emoji) {
-    const index = broadcastedMessagesList.indexOf(message.mid)
-    if (index > -1) {
-      // only splice array when item is found
-      broadcastedMessagesList.splice(index, 1) // 2nd parameter means remove one item only
-    }
+  if (!message.newReaction) {
+    broadcastedMessagesList.push(message)
   }
-
-  broadcastedMessagesList.push(message)
 
   if (connectedUsers.length < 1) {
     console.log("No users connected")
@@ -170,6 +164,15 @@ function addUser(cid, socket, scid) {
   )
 }
 
+const handleReaction = (message) => {
+  const foundMessage = broadcastedMessagesList.find(
+    (old) => old.srvAckMid === message.srvAckMid
+  )
+  foundMessage.reactions = message.reactions
+
+  broadcastMessage(message)
+}
+
 function init() {
   wss.on("connection", function connection(ws) {
     let cid = false
@@ -177,10 +180,8 @@ function init() {
 
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
-      if (parsedObject.emoji) {
-        console.log("user sent reaction")
-
-        broadcastMessage(parsedObject)
+      if (parsedObject.newReaction) {
+        handleReaction(parsedObject)
         return
       }
       if (parsedObject.clientInit === true) {

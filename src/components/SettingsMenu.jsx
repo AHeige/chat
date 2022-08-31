@@ -74,7 +74,6 @@ const SettingsMenu = () => {
   }
 
   const handleChangeName = (e) => {
-    console.log(ref.current.value)
     if (e.key === "Enter" && !e.shiftKey) {
       setUserName(ref.current.value)
     }
