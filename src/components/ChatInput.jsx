@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 
 //Material UI
 import Paper from "@mui/material/Paper"
@@ -9,10 +9,22 @@ import SendIcon from "@mui/icons-material/Send"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
 
-const ChatInput = ({ sendMessage, chatWidth }) => {
+const ChatInput = ({
+  sendMessage,
+  chatWidth,
+  handleIsWriting,
+  userIsWriting,
+  isWriting,
+  setIsWriting,
+}) => {
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
+    if (!isWriting) {
+      setIsWriting(true)
+      handleIsWriting(true)
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       sendMessage(ref.current.value)
       cleanInput()

@@ -53,7 +53,7 @@ function getLowestAvailableServerCid() {
 let broadcastedMessagesList = []
 
 function broadcastMessage(message, cidToSkip = -1) {
-  if (!message.newReaction) {
+  if (!message.newReaction || !message.isWriting) {
     broadcastedMessagesList.push(message)
   }
 
@@ -182,6 +182,10 @@ function init() {
       let parsedObject = JSON.parse(data)
       if (parsedObject.newReaction) {
         handleReaction(parsedObject)
+        return
+      }
+      if (parsedObject.isWriting) {
+        broadcastMessage(parsedObject)
         return
       }
       if (parsedObject.clientInit === true) {

@@ -42,6 +42,7 @@ const MainPage = () => {
   const [newMessages, setNewMessages] = useState([])
   const [notifyOthers, setNotifyOthers] = useState(false)
   const [newReaction, setNewReaction] = useState([])
+  const [userIsWriting, setUserIsWriting] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -74,6 +75,14 @@ const MainPage = () => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
       console.log("msgObj ", msgObj)
+
+      if (msgObj.isWriting) {
+        setUserIsWriting((previous) => {
+          return [...previous, msgObj]
+        })
+        return
+      }
+
       if (msgObj.newReaction) {
         setNewReaction(msgObj)
         return
@@ -254,6 +263,21 @@ const MainPage = () => {
     sock.send(JSON.stringify(reaction))
   }
 
+  const handleIsWriting = (isWriting) => {
+    const userIsWriting = {
+      isWriting: isWriting,
+      whoIsWriting: userName ? userName : temporaryName,
+    }
+
+    if (isWriting) {
+      sock.send(JSON.stringify(userIsWriting))
+    }
+  }
+
+  useEffect(() => {
+    console.log(userIsWriting)
+  }, [userIsWriting])
+
   return (
     <>
       <AppBar
@@ -312,6 +336,8 @@ const MainPage = () => {
           setIsOpen={setIsOpen}
           clientId={clientId}
           handleReaction={handleReaction}
+          userIsWriting={userIsWriting}
+          handleIsWriting={handleIsWriting}
         />
       </Grid>
     </>
