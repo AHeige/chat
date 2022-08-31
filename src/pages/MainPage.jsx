@@ -73,6 +73,12 @@ const MainPage = () => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
 
+      if (msgObj.emoji) {
+        console.log("reaction from server: ", msgObj)
+        addEmoji(msgObj)
+        return
+      }
+
       if (msgObj.cidResponse) {
         Cookies.set("cid", msgObj.cidOption, { expires: 365 })
 
@@ -95,6 +101,7 @@ const MainPage = () => {
       }
 
       if (msgObj.initMessage) {
+        console.log(msgObj)
         msgObj.messageHistory.forEach((msg) => {
           addMessage(msg)
         })
@@ -110,6 +117,7 @@ const MainPage = () => {
       removeAckMessage(msgObj)
       addMessage(msgObj)
       setNotifyOthers(true)
+
       if (!msgObj.systemMessage) {
         setNewMessages((previous) => {
           return [...previous, msgObj]
@@ -148,6 +156,19 @@ const MainPage = () => {
         return !(old.cid === msg.cid && old.mid === msg.srvAckMid)
       })
     })
+  }
+
+  const addEmoji = (msg) => {
+    setMessages((oldMessages) => {
+      return oldMessages.filter((old) => {
+        return !(old.cid === msg.cid && old.mid === msg.srvAckMid)
+      })
+    })
+    /* setMessages((oldMessages) => {
+      return oldMessages.filter((old) => {
+        return (old.mid === msg.mid && old.mid === msg.srvAckMid)
+      })
+    }) */
   }
 
   const sendMessage = (messageObject) => {
@@ -224,6 +245,7 @@ const MainPage = () => {
 
   const handleReaction = (reaction) => {
     console.log("handling reaction: ", reaction)
+    sock.send(JSON.stringify(reaction))
   }
 
   return (

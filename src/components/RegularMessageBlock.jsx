@@ -66,6 +66,9 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
       message: msgObj,
     }
 
+    msgObj.emoji = value
+    msgObj.by = userName ? userName : temporaryName
+
     console.log(reactionObj)
 
     //Enable if more reactions from one user
@@ -73,7 +76,7 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
       return [...previous, reactionObj]
     }) */
     setReaction([reactionObj])
-    handleReaction([reactionObj])
+    handleReaction(msgObj)
     handleOnHover(false)
   }
 

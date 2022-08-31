@@ -53,7 +53,16 @@ function getLowestAvailableServerCid() {
 let broadcastedMessagesList = []
 
 function broadcastMessage(message, cidToSkip = -1) {
+  if (message.emoji) {
+    const index = broadcastedMessagesList.indexOf(message.mid)
+    if (index > -1) {
+      // only splice array when item is found
+      broadcastedMessagesList.splice(index, 1) // 2nd parameter means remove one item only
+    }
+  }
+
   broadcastedMessagesList.push(message)
+
   if (connectedUsers.length < 1) {
     console.log("No users connected")
   }
@@ -168,6 +177,12 @@ function init() {
 
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
+      if (parsedObject.emoji) {
+        console.log("user sent reaction")
+
+        broadcastMessage(parsedObject)
+        return
+      }
       if (parsedObject.clientInit === true) {
         cid = getLowestAvailableCid()
         sendCidRequestMessage(ws, cid, scid)
