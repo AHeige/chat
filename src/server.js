@@ -1,5 +1,6 @@
 const express = require("express")
 const path = require("path")
+const { parse } = require("url")
 const app = express()
 
 app.use(express.static(path.join(__dirname, "../build")))
@@ -180,6 +181,43 @@ function init() {
 
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
+
+      if (parsedObject.text === "/clear") {
+        console.log ("Clears message log")
+        cid = parsedObject.cid
+        parsedObject.rxDate = new Date()
+        parsedObject.srvAckMid = parsedObject.mid
+        parsedObject.srvAck = true
+        parsedObject.text = "CHAT_CLEARED=OK"
+        broadcastMessage(parsedObject)
+        broadcastedMessagesList = []
+        return
+      }
+
+      if (parsedObject.text === "/len") {
+        console.log ("cmd len")
+        cid = parsedObject.cid
+        parsedObject.rxDate = new Date()
+        parsedObject.srvAckMid = parsedObject.mid
+        parsedObject.srvAck = true
+        parsedObject.text = "CHAT_LENGTH=" + broadcastedMessagesList.length
+        broadcastMessage(parsedObject)
+        broadcastedMessagesList = []
+        return
+      }
+
+      if (parsedObject.text === "/help") {
+        console.log ("cmd help")
+        cid = parsedObject.cid
+        parsedObject.rxDate = new Date()
+        parsedObject.srvAckMid = parsedObject.mid
+        parsedObject.srvAck = true
+        parsedObject.text = "Available Commands: /help /clear /len"
+        broadcastMessage(parsedObject)
+        broadcastedMessagesList = []
+        return
+      }
+
       if (parsedObject.newReaction) {
         handleReaction(parsedObject)
         return
