@@ -4,7 +4,7 @@ import React from "react"
 import Grid from "@mui/material/Grid"
 import MessageCard from "./MessageCard"
 
-const ChatMessages = ({ messages, clientId }) => {
+const ChatMessages = ({ messages, clientId, handleReaction }) => {
   //To-Do
   //Make it possible to change color of your text to what you like.
   return messages.map((obj, index) => (
@@ -16,7 +16,12 @@ const ChatMessages = ({ messages, clientId }) => {
       }}
       key={index}
     >
-      <MessageCard key={index} msgObj={obj} clientId={clientId} />
+      <MessageCard
+        key={index}
+        msgObj={obj}
+        clientId={clientId}
+        handleReaction={handleReaction}
+      />
     </Grid>
   ))
 }

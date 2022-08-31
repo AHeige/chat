@@ -41,6 +41,7 @@ const MainPage = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [newMessages, setNewMessages] = useState([])
   const [notifyOthers, setNotifyOthers] = useState(false)
+  const [newReaction, setNewReaction] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -72,6 +73,11 @@ const MainPage = () => {
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
+      console.log("msgObj ", msgObj)
+      if (msgObj.newReaction) {
+        setNewReaction(msgObj)
+        return
+      }
 
       if (msgObj.cidResponse) {
         Cookies.set("cid", msgObj.cidOption, { expires: 365 })
@@ -110,6 +116,7 @@ const MainPage = () => {
       removeAckMessage(msgObj)
       addMessage(msgObj)
       setNotifyOthers(true)
+
       if (!msgObj.systemMessage) {
         setNewMessages((previous) => {
           return [...previous, msgObj]
@@ -122,6 +129,25 @@ const MainPage = () => {
       setSocketLost(true)
     })
   }
+
+  useEffect(() => {
+    if (newReaction) {
+      const foundMessage = messages.find(
+        (old) => old.srvAckMid === newReaction.srvAckMid
+      )
+      const update = messages.map((msg) => {
+        if (msg.srvAckMid === foundMessage.srvAckMid) {
+          return { ...msg, reactions: newReaction.reactions }
+        }
+        return msg
+      })
+
+      setMessages(update)
+      if (newReaction.cid !== clientId) {
+        playSound()
+      }
+    }
+  }, [newReaction, setNewReaction])
 
   useEffect(() => {
     if (newMessages.length > 0) {
@@ -191,6 +217,8 @@ const MainPage = () => {
     }
 
     const messageObject = {
+      reactions: [],
+      newReaction: false,
       cid: clientId,
       color: textColor[colorPicker()],
       mid: messages.length,
@@ -221,6 +249,10 @@ const MainPage = () => {
   useEffect(() => {
     setNewMessages([])
   }, [isOpen])
+
+  const handleReaction = (reaction) => {
+    sock.send(JSON.stringify(reaction))
+  }
 
   return (
     <>
@@ -279,6 +311,7 @@ const MainPage = () => {
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           clientId={clientId}
+          handleReaction={handleReaction}
         />
       </Grid>
     </>

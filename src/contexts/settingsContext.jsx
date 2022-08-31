@@ -68,8 +68,6 @@ const SettingsProvider = ({ children }) => {
     setUserDecision((previous) => !previous)
     if (!userDecision === true) {
       const chatWidthCookie = JSON.parse(Cookies.get("settings"))
-      console.log(chatWidthCookie.chatWidthManual)
-      console.log(chatWidthCookie.chatWidth)
       setChatWidth(
         chatWidthCookie.chatWidthManual
           ? chatWidthCookie.chatWidthManual

@@ -20,7 +20,7 @@ import { msgObj } from "../interface/iMessages"
 
 import { SettingsContext } from "../contexts/settingsContext"
 
-const RegularMessageBlock = ({ msgObj, clientId }) => {
+const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
   const { showMyAvatar, toggleShowMyAvatar, userName, temporaryName } =
     useContext(SettingsContext)
   const [showReactionBar, setShowReactionBar] = useState(false)
@@ -59,24 +59,26 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
     setShowReactionBar(set)
   }
 
-  const handleReaction = (value) => {
+  const handleChosenReaction = (value) => {
     const reactionObj = {
       emoji: value,
       by: userName ? userName : temporaryName,
     }
 
-    console.log(reactionObj)
+    msgObj.reactions.push(reactionObj)
+    msgObj.newReaction = true
 
     //Enable if more reactions from one user
     /*     setReaction((previous) => {
       return [...previous, reactionObj]
     }) */
-    setReaction([reactionObj])
+
+    handleReaction(msgObj)
     handleOnHover(false)
   }
 
   const reactionElement = () => {
-    if (reaction.length > 0) {
+    if (msgObj.reactions) {
       return (
         <span
           style={{
@@ -84,7 +86,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
           }}
         >
           <FacebookCounter
-            counters={reaction}
+            counters={msgObj.reactions}
             user={userName ? userName : temporaryName}
           />
         </span>
@@ -157,7 +159,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
             <FacebookSelector
               iconSize={30}
               style={{ width: "fit-content" }}
-              onSelect={(value) => handleReaction(value)}
+              onSelect={(value) => handleChosenReaction(value)}
             />
           </span>
         )}

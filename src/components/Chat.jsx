@@ -11,7 +11,7 @@ import Drawer from "@mui/material/Drawer"
 //Contexts
 import { SettingsContext } from "../contexts/settingsContext"
 
-const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
+const Chat = ({ sendMessage, messages, isOpen, clientId, handleReaction }) => {
   const { chatWidth } = useContext(SettingsContext)
 
   const bottomRef = useRef(null)
@@ -49,7 +49,11 @@ const Chat = ({ sendMessage, messages, isOpen, clientId }) => {
           flex: "auto",
         }}
       >
-        <ChatMessages messages={messages} clientId={clientId} />
+        <ChatMessages
+          messages={messages}
+          clientId={clientId}
+          handleReaction={handleReaction}
+        />
       </Grid>
 
       <ChatInput

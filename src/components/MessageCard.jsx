@@ -8,7 +8,7 @@ import RegularMessageBlock from "./RegularMessageBlock"
 //Contexts
 import { SettingsContext } from "../contexts/settingsContext"
 
-const MessageCard = ({ msgObj, clientId }) => {
+const MessageCard = ({ msgObj, clientId, handleReaction }) => {
   const { showChatLogs } = useContext(SettingsContext)
 
   const systemMessage =
@@ -30,6 +30,7 @@ const MessageCard = ({ msgObj, clientId }) => {
             style={{ alignContent: "right" }}
             msgObj={msgObj}
             clientId={clientId}
+            handleReaction={handleReaction}
           />
         </CardContent>
       )}
