@@ -222,6 +222,10 @@ const MainPage = () => {
     setNewMessages([])
   }, [isOpen])
 
+  const handleReaction = (reaction) => {
+    console.log("handling reaction: ", reaction)
+  }
+
   return (
     <>
       <AppBar
@@ -279,6 +283,7 @@ const MainPage = () => {
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           clientId={clientId}
+          handleReaction={handleReaction}
         />
       </Grid>
     </>

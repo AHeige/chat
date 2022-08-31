@@ -20,7 +20,7 @@ import { msgObj } from "../interface/iMessages"
 
 import { SettingsContext } from "../contexts/settingsContext"
 
-const RegularMessageBlock = ({ msgObj, clientId }) => {
+const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
   const { showMyAvatar, toggleShowMyAvatar, userName, temporaryName } =
     useContext(SettingsContext)
   const [showReactionBar, setShowReactionBar] = useState(false)
@@ -59,10 +59,11 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
     setShowReactionBar(set)
   }
 
-  const handleReaction = (value) => {
+  const handleChosenReaction = (value) => {
     const reactionObj = {
       emoji: value,
       by: userName ? userName : temporaryName,
+      message: msgObj,
     }
 
     console.log(reactionObj)
@@ -72,6 +73,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
       return [...previous, reactionObj]
     }) */
     setReaction([reactionObj])
+    handleReaction([reactionObj])
     handleOnHover(false)
   }
 
@@ -157,7 +159,7 @@ const RegularMessageBlock = ({ msgObj, clientId }) => {
             <FacebookSelector
               iconSize={30}
               style={{ width: "fit-content" }}
-              onSelect={(value) => handleReaction(value)}
+              onSelect={(value) => handleChosenReaction(value)}
             />
           </span>
         )}
