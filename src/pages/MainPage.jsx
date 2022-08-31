@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useContext } from "react"
 import Cookies from "js-cookie"
 
+//Sound
+import useSound from "use-sound"
+import messageSound from "../assets/messageSound.mp3"
+import ChatFx2 from "../assets/ChatFx.mp3"
+
 //Pages
 import Game2D from "../components/Game2D"
 
@@ -35,7 +40,10 @@ const MainPage = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
   const [newMessages, setNewMessages] = useState([])
+  const [notifyOthers, setNotifyOthers] = useState(false)
   const [pageTitle, setPageTitle] = useState(document.title)
+  const [play, { stop }] = useSound(ChatFx2)
+
   const { userName, temporaryName, setTemporaryName, startWidthChatOpen } =
     useContext(SettingsContext)
 
@@ -48,10 +56,6 @@ const MainPage = () => {
     setSock(socket)
     addEventListeners(socket)
   }, [socketLost])
-
-  useEffect(() => {
-    console.log("messages updated ", messages)
-  }, [messages])
 
   useEffect(() => {
     setIsOpen(startWidthChatOpen)
@@ -68,9 +72,8 @@ const MainPage = () => {
   const addEventListeners = (socket) => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
-      if (msgObj.cidResponse) {
-        console.log("cidResponse")
 
+      if (msgObj.cidResponse) {
         Cookies.set("cid", msgObj.cidOption, { expires: 365 })
 
         setClientId(() => {
@@ -83,7 +86,6 @@ const MainPage = () => {
       }
 
       if (getCidFromCookie() === false) {
-        console.log("clientInit")
         sendWith(socket, { clientInit: true })
         return
       } else {
@@ -96,7 +98,7 @@ const MainPage = () => {
         msgObj.messageHistory.forEach((msg) => {
           addMessage(msg)
         })
-        console.log("initMessage")
+
         msgObj.text = msgObj.text + " Player " + getCidFromCookie()
 
         msgObj.user = "Player #" + getCidFromCookie()
@@ -107,7 +109,12 @@ const MainPage = () => {
       msgObj.mid = messages.length
       removeAckMessage(msgObj)
       addMessage(msgObj)
-      notification(msgObj)
+      setNotifyOthers(true)
+      if (!msgObj.systemMessage) {
+        setNewMessages((previous) => {
+          return [...previous, msgObj]
+        })
+      }
       setTemporaryName("Player #" + getCidFromCookie())
     })
 
@@ -115,6 +122,19 @@ const MainPage = () => {
       setSocketLost(true)
     })
   }
+
+  useEffect(() => {
+    if (newMessages.length > 0) {
+      const latestMessage = newMessages[newMessages.length - 1]
+
+      const imTheSender = latestMessage.cid === clientId
+
+      if (notifyOthers === true && !imTheSender) {
+        setNotifyOthers((previous) => !previous)
+        playSound()
+      }
+    }
+  }, [newMessages])
 
   const addMessage = (message) => {
     setMessages((oldMessages) => {
@@ -194,12 +214,8 @@ const MainPage = () => {
     setIsOpen((previous) => !previous)
   }
 
-  const notification = (message) => {
-    if (!message.systemMessage) {
-      setNewMessages((previous) => {
-        return [...previous, message]
-      })
-    }
+  const playSound = () => {
+    play()
   }
 
   useEffect(() => {
