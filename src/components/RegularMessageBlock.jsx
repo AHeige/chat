@@ -64,6 +64,7 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
       emoji: value,
       by: userName ? userName : temporaryName,
       cid: clientId,
+      color: userColor(),
     }
 
     msgObj.reactions.push(reactionObj)
@@ -84,13 +85,12 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
         <span
           style={{
             float: myMessage ? "right" : "left",
-            marginTop: "1em",
+            zoom: 1.5,
           }}
         >
           <FacebookCounter
             counters={msgObj.reactions}
-            user={userName ? userName : temporaryName}
-            important={["Player #2", "Johan"]}
+            important={msgObj.reactions.map((reaction) => reaction.by)}
           />
         </span>
       )
