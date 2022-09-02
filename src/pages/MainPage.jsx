@@ -41,7 +41,7 @@ const MainPage = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [newMessages, setNewMessages] = useState([])
   const [notifyOthers, setNotifyOthers] = useState(false)
-  const [newReaction, setNewReaction] = useState([])
+  const [newReactions, setNewReactions] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -75,7 +75,7 @@ const MainPage = () => {
       let msgObj = JSON.parse(event.data)
       console.log("msgObj ", msgObj)
       if (msgObj.newReaction) {
-        setNewReaction(msgObj)
+        setNewReactions(msgObj)
         return
       }
 
@@ -131,23 +131,24 @@ const MainPage = () => {
   }
 
   useEffect(() => {
-    if (newReaction) {
+    if (newReactions) {
       const foundMessage = messages.find(
-        (old) => old.srvAckMid === newReaction.srvAckMid
+        (old) => old.srvAckMid === newReactions.srvAckMid
       )
+
       const update = messages.map((msg) => {
         if (msg.srvAckMid === foundMessage.srvAckMid) {
-          return { ...msg, reactions: newReaction.reactions }
+          return { ...msg, reactions: newReactions.reactions }
         }
         return msg
       })
 
       setMessages(update)
-      if (newReaction.cid !== clientId) {
+      if (newReactions.cid !== clientId) {
         playSound()
       }
     }
-  }, [newReaction, setNewReaction])
+  }, [newReactions, setNewReactions])
 
   useEffect(() => {
     if (newMessages.length > 0) {
