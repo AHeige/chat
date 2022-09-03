@@ -304,7 +304,7 @@ const MainPage = () => {
 
       <Grid container sx={{ overflow: "hidden" }}>
         <Grid item xs={12}>
-          <Game2D id="aster1" cid={clientId}></Game2D>
+          {/* <Game2D id="aster1" cid={clientId}></Game2D> */}
         </Grid>
         <Chat
           messages={messages}

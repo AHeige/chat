@@ -43,7 +43,7 @@ const Chat = ({ sendMessage, messages, isOpen, clientId, handleReaction }) => {
         alignContent={"flex-end"}
         style={{
           //minHeight: "100vh",
-          marginBottom: "3.5em",
+          marginBottom: "4em",
           marginTop: "2.8em",
           //backgroundColor: "#000",
           flex: "auto",

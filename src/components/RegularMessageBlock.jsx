@@ -11,9 +11,17 @@ import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
 import Avatar from "@mui/material/Avatar"
+import Tooltip from "@mui/material/Tooltip"
 
 //Reactions
-import { FacebookSelector, FacebookCounter } from "@charkour/react-reactions"
+import {
+  FacebookSelector,
+  FacebookCounter,
+  FacebookCounterReaction,
+  SlackSelector,
+  SlackCounter,
+  SlackCounterGroup,
+} from "@charkour/react-reactions"
 
 //Interface
 import { msgObj } from "../interface/iMessages"
@@ -25,6 +33,7 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
     useContext(SettingsContext)
   const [showReactionBar, setShowReactionBar] = useState(false)
   const [reaction, setReaction] = useState([])
+  const [hoverReaction, setHoverReaction] = useState(false)
   const cardRef = useRef(null)
   const myMessage = msgObj.cid === clientId
 
@@ -88,10 +97,40 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
             zoom: 1.5,
           }}
         >
-          <FacebookCounter
+          {/*           <FacebookCounter
             counters={msgObj.reactions}
             important={msgObj.reactions.map((reaction) => reaction.by)}
           />
+ */}
+          <span
+            style={{ display: "flex" }}
+            onMouseEnter={() => setHoverReaction(true)}
+            onMouseLeave={() => setHoverReaction(false)}
+          >
+            {msgObj.reactions.map((reaction, index) => (
+              <span key={index} style={{ display: "flex", direction: "row" }}>
+                <FacebookCounterReaction
+                  key={Math.random()}
+                  reaction={reaction.emoji}
+                  bg={"#fff"}
+                  variant={"facebook"}
+                />
+                {hoverReaction && (
+                  <span
+                    style={{
+                      fontSize: "0.5em",
+                      marginLeft: "1em",
+                      marginRight: "1em",
+                      marginTop: "0.35em",
+                      display: "flex",
+                    }}
+                  >
+                    {reaction.by}
+                  </span>
+                )}
+              </span>
+            ))}
+          </span>
         </span>
       )
     }
@@ -144,18 +183,11 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
             borderBottomRightRadius: myMessage ? "4px" : "18px",
           }}
         >
-          <CardContent
-            ref={cardRef}
-            style={{ width: "fit-content", padding: "10px" }}
-          >
-            <span style={{ wordBreak: "break-word" }}>{msgObj.text}</span>
-          </CardContent>
           {showReactionBar && (
             <span
               style={{
                 right: myMessage ? 0 : "",
                 display: "flex",
-
                 zIndex: "100",
                 position: "absolute",
               }}
@@ -167,6 +199,12 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
               />
             </span>
           )}
+          <CardContent
+            ref={cardRef}
+            style={{ width: "fit-content", padding: "10px" }}
+          >
+            <span style={{ wordBreak: "break-word" }}>{msgObj.text}</span>
+          </CardContent>
         </Card>
       </span>
       {reaction && reactionElement()}
