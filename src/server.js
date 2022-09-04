@@ -197,6 +197,21 @@ const handleReaction = (message) => {
   broadcastMessage(message)
 }
 
+const sendUsers = (cid, scid) => {
+  broadcastMessage({
+    requestedOnlineUsers: true,
+    onlineUsers: getListOfConnectedUsers(),
+    systemMessage: true,
+    rxDate: new Date(),
+    srvAck: true,
+    user: "",
+    text: "Amount of users changed",
+    userLeft: true,
+    cid: cid,
+    scid: scid,
+  })
+}
+
 function init() {
   wss.on("connection", function connection(ws) {
     let cid = false
@@ -249,10 +264,12 @@ function init() {
         cid = getLowestAvailableCid()
         sendCidRequestMessage(ws, cid, scid)
         addUser(cid, ws, scid)
+        sendUsers(cid, scid)
       } else if (parsedObject.haveCookieCid) {
         cid = parsedObject.cid
         console.log("Add user with existing cid " + parsedObject.cid)
         addUser(parsedObject.cid, ws, scid)
+        sendUsers(cid, scid)
       } else {
         cid = parsedObject.cid
         parsedObject.rxDate = new Date()
@@ -260,6 +277,7 @@ function init() {
         parsedObject.srvAck = true
         //parsedObject.user = "Player #" + parsedObject.cid
         broadcastMessage(parsedObject)
+        sendUsers(cid, scid)
       }
     })
 
@@ -277,6 +295,18 @@ function init() {
       removeUser(scid)
       console.log("User scid:" + scid + " left the chat")
       console.log({ connectedUsers })
+      broadcastMessage({
+        requestedOnlineUsers: true,
+        onlineUsers: getListOfConnectedUsers(),
+        systemMessage: true,
+        rxDate: new Date(),
+        srvAck: true,
+        user: "",
+        text: "Amount of users changed",
+        userLeft: true,
+        cid: cid,
+        scid: scid,
+      })
     })
 
     sendWelcomeMessage(ws)

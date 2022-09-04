@@ -42,6 +42,7 @@ const MainPage = () => {
   const [newMessages, setNewMessages] = useState([])
   const [notifyOthers, setNotifyOthers] = useState(false)
   const [newReactions, setNewReactions] = useState([])
+  const [users, setUsers] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -76,6 +77,16 @@ const MainPage = () => {
       console.log("msgObj ", msgObj)
       if (msgObj.newReaction) {
         setNewReactions(msgObj)
+        return
+      }
+
+      if (msgObj.requestedOnlineUsers) {
+        setUsers([])
+        msgObj.onlineUsers.map((user) => {
+          setUsers((previous) => {
+            return [...previous, user]
+          })
+        })
         return
       }
 
@@ -151,6 +162,10 @@ const MainPage = () => {
   }, [newReactions, setNewReactions])
 
   useEffect(() => {
+    console.log(users)
+  }, [users])
+
+  useEffect(() => {
     if (newMessages.length > 0) {
       const latestMessage = newMessages[newMessages.length - 1]
 
@@ -223,6 +238,8 @@ const MainPage = () => {
       cid: clientId,
       color: textColor[colorPicker()],
       mid: messages.length,
+      onlineUsers: [],
+      requestedOnlineUsers: false,
       rxDate: new Date(),
       srvAck: false,
       text: message,
@@ -304,7 +321,7 @@ const MainPage = () => {
 
       <Grid container sx={{ overflow: "hidden" }}>
         <Grid item xs={12}>
-          {/* <Game2D id="aster1" cid={clientId}></Game2D> */}
+          <Game2D id="aster1" cid={clientId}></Game2D>
         </Grid>
         <Chat
           messages={messages}
