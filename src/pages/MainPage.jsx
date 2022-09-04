@@ -16,7 +16,7 @@ import SettingsMenu from "../components/SettingsMenu"
 
 //Material UI
 import Grid from "@mui/material/Grid"
-import WestIcon from "@mui/icons-material/West"
+import Tooltip from "@mui/material/Tooltip"
 import EastIcon from "@mui/icons-material/East"
 import CommentIcon from "@mui/icons-material/Comment"
 import SettingsIcon from "@mui/icons-material/Settings"
@@ -27,6 +27,7 @@ import TuneIcon from "@mui/icons-material/Tune"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
 import Badge from "@mui/material/Badge"
+import PeopleIcon from "@mui/icons-material/People"
 
 //Contexts
 import { DarkModeContext } from "../contexts/themeContext"
@@ -162,10 +163,6 @@ const MainPage = () => {
   }, [newReactions, setNewReactions])
 
   useEffect(() => {
-    console.log(users)
-  }, [users])
-
-  useEffect(() => {
     if (newMessages.length > 0) {
       const latestMessage = newMessages[newMessages.length - 1]
 
@@ -272,6 +269,23 @@ const MainPage = () => {
     sock.send(JSON.stringify(reaction))
   }
 
+  const handleToggleDialog = () => {
+    setOpenDialog((previous) => !previous)
+  }
+
+  const usersOnline = () => {
+    return (
+      <>
+        <h3>Users Online</h3>
+        <span>
+          {users.map((user, index) => (
+            <p key={index}>{user.name}</p>
+          ))}
+        </span>
+      </>
+    )
+  }
+
   return (
     <>
       <AppBar
@@ -289,25 +303,43 @@ const MainPage = () => {
           spacing={1}
           style={{ marginTop: "0.7em", marginBottom: "0.7em" }}
         >
-          <Button variant="outlined" onClick={toggleDarkMode}>
-            {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
-          </Button>
-          <Button variant="outlined" onClick={() => setOpenDialog(true)}>
-            <SettingsIcon />
-          </Button>
-
-          <Button
-            variant="outlined"
-            endIcon={isOpen && <EastIcon />}
-            onClick={toggleDrawer}
+          <Tooltip title={usersOnline()}>
+            <Button variant="outlined">
+              <PeopleIcon />
+              <Badge
+                sx={{ marginBottom: "1.2em", marginLeft: "0.5em" }}
+                badgeContent={users ? users.length : null}
+                color="primary"
+              ></Badge>
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title={darkMode ? "Turn on the lights!" : "Turn off the lights!"}
           >
-            <CommentIcon />
-            <Badge
-              sx={{ marginBottom: "1.2em", marginLeft: "0.5em" }}
-              badgeContent={!isOpen ? newMessages.length : null}
-              color="warning"
-            ></Badge>
-          </Button>
+            <Button variant="outlined" onClick={toggleDarkMode}>
+              {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+            </Button>
+          </Tooltip>
+          <Tooltip title="Settings">
+            <Button variant="outlined" onClick={() => handleToggleDialog()}>
+              <SettingsIcon />
+            </Button>
+          </Tooltip>
+
+          <Tooltip title={isOpen ? "Close chat" : "Open chat"}>
+            <Button
+              variant="outlined"
+              endIcon={isOpen && <EastIcon />}
+              onClick={toggleDrawer}
+            >
+              <CommentIcon />
+              <Badge
+                sx={{ marginBottom: "1.2em", marginLeft: "0.5em" }}
+                badgeContent={!isOpen ? newMessages.length : null}
+                color="warning"
+              ></Badge>
+            </Button>
+          </Tooltip>
         </Stack>
       </AppBar>
 

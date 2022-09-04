@@ -11,7 +11,7 @@ import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
 import Avatar from "@mui/material/Avatar"
-import Tooltip from "@mui/material/Tooltip"
+import Grow from "@mui/material/Grow"
 
 //Reactions
 import {
@@ -27,6 +27,7 @@ import {
 import { msgObj } from "../interface/iMessages"
 
 import { SettingsContext } from "../contexts/settingsContext"
+import { Fade } from "@mui/material"
 
 const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
   const { showMyAvatar, toggleShowMyAvatar, userName, temporaryName } =
@@ -88,6 +89,22 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
     handleOnHover(false)
   }
 
+  const hoverReactionElement = (username) => {
+    return (
+      <span
+        style={{
+          fontSize: "0.5em",
+          marginLeft: "1em",
+          marginRight: "1em",
+          marginTop: "0.35em",
+          display: "flex",
+        }}
+      >
+        <span>{username}</span>
+      </span>
+    )
+  }
+
   const reactionElement = () => {
     if (msgObj.reactions) {
       return (
@@ -97,11 +114,6 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
             zoom: 1.5,
           }}
         >
-          {/*           <FacebookCounter
-            counters={msgObj.reactions}
-            important={msgObj.reactions.map((reaction) => reaction.by)}
-          />
- */}
           <span
             style={{ display: "flex" }}
             onMouseEnter={() => setHoverReaction(true)}
@@ -110,24 +122,12 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
             {msgObj.reactions.map((reaction, index) => (
               <span key={index} style={{ display: "flex", direction: "row" }}>
                 <FacebookCounterReaction
-                  key={Math.random()}
+                  key={index}
                   reaction={reaction.emoji}
                   bg={"#fff"}
                   variant={"facebook"}
                 />
-                {hoverReaction && (
-                  <span
-                    style={{
-                      fontSize: "0.5em",
-                      marginLeft: "1em",
-                      marginRight: "1em",
-                      marginTop: "0.35em",
-                      display: "flex",
-                    }}
-                  >
-                    {reaction.by}
-                  </span>
-                )}
+                {hoverReaction && hoverReactionElement(reaction.by)}
               </span>
             ))}
           </span>
