@@ -44,6 +44,7 @@ const MainPage = () => {
   const [notifyOthers, setNotifyOthers] = useState(false)
   const [newReactions, setNewReactions] = useState([])
   const [users, setUsers] = useState([])
+  const [myMessages, setMyMessages] = useState([])
   const [pageTitle, setPageTitle] = useState(document.title)
   const [play, { stop }] = useSound(ChatFx2)
 
@@ -221,6 +222,10 @@ const MainPage = () => {
   }
 
   const handleMessageSubmit = (message) => {
+    setMyMessages((previous) => {
+      return [...previous, message]
+    })
+
     if (!message) {
       return
     }
@@ -228,6 +233,8 @@ const MainPage = () => {
     if (sock.readyState !== 1) {
       setSocketLost((oldVal) => !oldVal)
     }
+
+    const chatCommand = message.charAt(0) === "/"
 
     const messageObject = {
       reactions: [],
@@ -243,9 +250,13 @@ const MainPage = () => {
       thisIsMe: true,
       type: 1,
       user: userName ? userName : "Player #" + getCidFromCookie(),
+      chatCommand: chatCommand,
     }
 
-    addMessage(messageObject)
+    if (!chatCommand) {
+      addMessage(messageObject)
+    }
+
     sendMessage(messageObject)
   }
 
@@ -353,7 +364,7 @@ const MainPage = () => {
 
       <Grid container sx={{ overflow: "hidden" }}>
         <Grid item xs={12}>
-          <Game2D id="aster1" cid={clientId}></Game2D>
+          {/* <Game2D id="aster1" cid={clientId}></Game2D> */}
         </Grid>
         <Chat
           messages={messages}
@@ -362,6 +373,7 @@ const MainPage = () => {
           setIsOpen={setIsOpen}
           clientId={clientId}
           handleReaction={handleReaction}
+          myMessages={myMessages}
         />
       </Grid>
     </>

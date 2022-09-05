@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useRef, useEffect, useState } from "react"
 
 //Material UI
 import Paper from "@mui/material/Paper"
@@ -9,13 +9,56 @@ import SendIcon from "@mui/icons-material/Send"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
 
-const ChatInput = ({ sendMessage, chatWidth }) => {
+const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
+  const [oldMsgNumber, setOldMsgNumber] = useState()
+  const [recallMsg, setRecallMsg] = useState(false)
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
+    const min = 0
+    const max = myMessages.length - 1
+
     if (e.key === "Enter" && !e.shiftKey) {
       sendMessage(ref.current.value)
       cleanInput()
+      setOldMsgNumber(myMessages.length)
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+
+      if (recallMsg && oldMsgNumber === myMessages.length - 1) {
+        ref.current.value = myMessages[myMessages.length - 2]
+        setOldMsgNumber((previous) => previous - 2)
+        return
+      }
+
+      if (oldMsgNumber === 0) {
+        setOldMsgNumber(0)
+      } else setOldMsgNumber((previous) => previous - 1)
+
+      recallMessage()
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+
+      if (recallMsg && oldMsgNumber === 0) {
+        ref.current.value = myMessages[1]
+        setOldMsgNumber((previous) => previous + 2)
+        return
+      }
+      const max = myMessages.length - 1
+      if (oldMsgNumber === max) {
+        setOldMsgNumber((previous) => previous)
+      } else setOldMsgNumber((previous) => previous + 1)
+      recallMessage()
+    }
+  }
+
+  const recallMessage = () => {
+    console.log(oldMsgNumber)
+    setRecallMsg(true)
+    if (myMessages.length > 0) {
+      ref.current.value = myMessages[oldMsgNumber]
     }
   }
 

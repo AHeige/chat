@@ -11,7 +11,14 @@ import Drawer from "@mui/material/Drawer"
 //Contexts
 import { SettingsContext } from "../contexts/settingsContext"
 
-const Chat = ({ sendMessage, messages, isOpen, clientId, handleReaction }) => {
+const Chat = ({
+  sendMessage,
+  messages,
+  isOpen,
+  clientId,
+  handleReaction,
+  myMessages,
+}) => {
   const { chatWidth } = useContext(SettingsContext)
 
   const bottomRef = useRef(null)
@@ -60,6 +67,7 @@ const Chat = ({ sendMessage, messages, isOpen, clientId, handleReaction }) => {
         style={{ position: "fixed", bottom: "0" }}
         sendMessage={sendMessage}
         chatWidth={chatWidth}
+        myMessages={myMessages}
       />
     </Drawer>
   )

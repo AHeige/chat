@@ -212,6 +212,22 @@ const sendUsers = (cid, scid) => {
   })
 }
 
+const getMessageLength = () => {
+  let systemMessages = 0
+  let chatMessages = 0
+
+  broadcastedMessagesList.forEach((message) => {
+    if (message.systemMessage) {
+      systemMessages++
+    } else chatMessages++
+  })
+
+  return {
+    systemMessages: systemMessages,
+    chatMessages: chatMessages,
+  }
+}
+
 function init() {
   wss.on("connection", function connection(ws) {
     let cid = false
@@ -220,39 +236,76 @@ function init() {
     ws.on("message", function message(data) {
       let parsedObject = JSON.parse(data)
 
-      if (parsedObject.text === "/clear") {
-        console.log("Clears message log")
-        cid = parsedObject.cid
-        parsedObject.rxDate = new Date()
-        parsedObject.srvAckMid = parsedObject.mid
-        parsedObject.srvAck = true
-        parsedObject.text = "CHAT_CLEARED=OK"
-        broadcastMessage(parsedObject)
-        broadcastedMessagesList = []
-        return
-      }
+      if (parsedObject.chatCommand) {
+        const firstChar = parsedObject.text.charAt(0)
+        console.log(firstChar)
+        console.log(parsedObject.text)
 
-      if (parsedObject.text === "/len") {
-        console.log("cmd len")
-        cid = parsedObject.cid
-        parsedObject.rxDate = new Date()
-        parsedObject.srvAckMid = parsedObject.mid
-        parsedObject.srvAck = true
-        parsedObject.text = "CHAT_LENGTH=" + broadcastedMessagesList.length
-        broadcastMessage(parsedObject)
-        broadcastedMessagesList = []
-        return
-      }
+        if (parsedObject.text === "/clear") {
+          console.log("Clears message log")
+          cid = parsedObject.cid
+          parsedObject.systemMessage = true
+          parsedObject.rxDate = new Date()
+          parsedObject.srvAckMid = parsedObject.mid
+          parsedObject.srvAck = true
+          parsedObject.text = " - Cleared chat"
+          broadcastMessage(parsedObject)
+          broadcastedMessagesList = []
+          return
+        }
+        if (parsedObject.text === "/users") {
+          const users = getListOfConnectedUsers()
+          console.log("Write out online users")
+          cid = parsedObject.cid
+          parsedObject.systemMessage = true
+          parsedObject.rxDate = new Date()
+          parsedObject.srvAckMid = parsedObject.mid
+          parsedObject.srvAck = true
+          parsedObject.text =
+            " - Users: " + users.map((user) => " " + user.name)
+          broadcastMessage(parsedObject)
 
-      if (parsedObject.text === "/help") {
-        console.log("cmd help")
+          return
+        }
+
+        if (parsedObject.text === "/len") {
+          const messageLength = getMessageLength()
+          console.log("cmd len")
+          cid = parsedObject.cid
+          parsedObject.systemMessage = true
+          parsedObject.rxDate = new Date()
+          parsedObject.srvAckMid = parsedObject.mid
+          parsedObject.srvAck = true
+          parsedObject.text =
+            " - Chat messages: " +
+            messageLength.chatMessages +
+            " - System messages: " +
+            messageLength.systemMessages +
+            "\n"
+
+          broadcastMessage(parsedObject)
+          return
+        }
+
+        if (parsedObject.text === "/help") {
+          console.log("cmd help")
+          cid = parsedObject.cid
+          parsedObject.systemMessage = true
+          parsedObject.rxDate = new Date()
+          parsedObject.srvAckMid = parsedObject.mid
+          parsedObject.srvAck = true
+          parsedObject.text = " - Available Commands: /help /clear /len"
+          broadcastMessage(parsedObject)
+          return
+        } else console.log("Command not found")
         cid = parsedObject.cid
+        parsedObject.systemMessage = true
         parsedObject.rxDate = new Date()
         parsedObject.srvAckMid = parsedObject.mid
         parsedObject.srvAck = true
-        parsedObject.text = "Available Commands: /help /clear /len"
+        parsedObject.text =
+          " - Chat command not found. Write /help to see available commands"
         broadcastMessage(parsedObject)
-        broadcastedMessagesList = []
         return
       }
 
