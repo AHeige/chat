@@ -249,8 +249,10 @@ function init() {
           parsedObject.srvAckMid = parsedObject.mid
           parsedObject.srvAck = true
           parsedObject.text = " - Cleared chat"
+          parsedObject.clearChat = true
           broadcastMessage(parsedObject)
           broadcastedMessagesList = []
+          broadcastedMessagesList.push(parsedObject)
           return
         }
         if (parsedObject.text === "/users") {

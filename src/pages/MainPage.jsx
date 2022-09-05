@@ -77,6 +77,11 @@ const MainPage = () => {
     socket.addEventListener("message", (event) => {
       let msgObj = JSON.parse(event.data)
       console.log("msgObj ", msgObj)
+
+      if (msgObj.clearChat) {
+        setMessages([])
+      }
+
       if (msgObj.newReaction) {
         setNewReactions(msgObj)
         return
@@ -157,9 +162,6 @@ const MainPage = () => {
       })
 
       setMessages(update)
-      if (newReactions.cid !== clientId) {
-        playSound()
-      }
     }
   }, [newReactions, setNewReactions])
 
@@ -251,6 +253,7 @@ const MainPage = () => {
       type: 1,
       user: userName ? userName : "Player #" + getCidFromCookie(),
       chatCommand: chatCommand,
+      clearChat: false,
     }
 
     if (!chatCommand) {
@@ -364,7 +367,7 @@ const MainPage = () => {
 
       <Grid container sx={{ overflow: "hidden" }}>
         <Grid item xs={12}>
-          {/* <Game2D id="aster1" cid={clientId}></Game2D> */}
+          <Game2D id="aster1" cid={clientId}></Game2D>
         </Grid>
         <Chat
           messages={messages}
