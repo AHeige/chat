@@ -10,15 +10,12 @@ import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
 
 const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
-  const [oldMsgNumber, setOldMsgNumber] = useState()
+  const [oldMsgNumber, setOldMsgNumber] = useState(0)
   const [recallMsg, setRecallMsg] = useState(false)
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
-    const min = 0
-    const max = myMessages.length - 1
-
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && e.target.value !== "") {
       sendMessage(ref.current.value)
       cleanInput()
       setOldMsgNumber(myMessages.length)
@@ -26,41 +23,43 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
     if (e.key === "ArrowUp") {
       e.preventDefault()
 
-      if (recallMsg && oldMsgNumber === myMessages.length - 1) {
-        ref.current.value = myMessages[myMessages.length - 2]
-        setOldMsgNumber((previous) => previous - 2)
-        return
-      }
-
-      if (oldMsgNumber === 0) {
-        setOldMsgNumber(0)
-      } else setOldMsgNumber((previous) => previous - 1)
-
-      recallMessage()
+      recallMessage(e.key)
     }
     if (e.key === "ArrowDown") {
       e.preventDefault()
-
-      if (recallMsg && oldMsgNumber === 0) {
-        ref.current.value = myMessages[1]
-        setOldMsgNumber((previous) => previous + 2)
-        return
-      }
-      const max = myMessages.length - 1
-      if (oldMsgNumber === max) {
-        setOldMsgNumber((previous) => previous)
-      } else setOldMsgNumber((previous) => previous + 1)
-      recallMessage()
+      recallMessage(e.key)
     }
   }
 
-  const recallMessage = () => {
-    console.log(oldMsgNumber)
-    setRecallMsg(true)
+  const recallMessage = (key) => {
+    console.log("myMessage length ", myMessages.length)
+    console.log("oldmsgnumber ", oldMsgNumber)
+    if (myMessages.length === 0) {
+      return
+    } else if (key === "ArrowUp") {
+      const arrayMin = 0
+      setOldMsgNumber((previous) => {
+        if (previous === arrayMin) {
+          return arrayMin
+        } else return previous - 1
+      })
+    }
+    if (key === "ArrowDown") {
+      const arrayMax = myMessages.length - 1
+
+      setOldMsgNumber((previous) => {
+        if (previous === arrayMax) {
+          return arrayMax
+        } else return previous + 1
+      })
+    }
+  }
+
+  useEffect(() => {
     if (myMessages.length > 0) {
       ref.current.value = myMessages[oldMsgNumber]
     }
-  }
+  }, [oldMsgNumber, setOldMsgNumber])
 
   const buttonSend = () => {
     const m = ref.current.value
