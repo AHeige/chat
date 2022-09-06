@@ -8,6 +8,13 @@ import Input from "@mui/material/Input"
 import SendIcon from "@mui/icons-material/Send"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
+import List from "@mui/material/List"
+import ListItemButton from "@mui/material/ListItemButton"
+import ListItemIcon from "@mui/material/ListItemIcon"
+import ListItemText from "@mui/material/ListItemText"
+
+//Components
+import Recall from "./Recall"
 
 const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
   const [oldMsgNumber, setOldMsgNumber] = useState(0)
@@ -15,10 +22,17 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
   const ref = useRef(null)
 
   const handleSendMessage = (e) => {
+    if (e.type === "pointerdown" && !e.shiftKey && e.target.value !== "") {
+      setRecallMsg(false)
+      sendMessage(e.target.innerText)
+      cleanInput()
+      setOldMsgNumber(myMessages.length + 1)
+    }
     if (e.key === "Enter" && !e.shiftKey && e.target.value !== "") {
+      setRecallMsg(false)
       sendMessage(ref.current.value)
       cleanInput()
-      setOldMsgNumber(myMessages.length)
+      setOldMsgNumber(myMessages.length + 1)
     }
     if (e.key === "ArrowUp") {
       e.preventDefault()
@@ -27,16 +41,16 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
     }
     if (e.key === "ArrowDown") {
       e.preventDefault()
+
       recallMessage(e.key)
     }
   }
 
   const recallMessage = (key) => {
-    console.log("myMessage length ", myMessages.length)
-    console.log("oldmsgnumber ", oldMsgNumber)
     if (myMessages.length === 0) {
       return
     } else if (key === "ArrowUp") {
+      setRecallMsg(true)
       const arrayMin = 0
       setOldMsgNumber((previous) => {
         if (previous === arrayMin) {
@@ -46,9 +60,9 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
     }
     if (key === "ArrowDown") {
       const arrayMax = myMessages.length - 1
-
+      setRecallMsg(true)
       setOldMsgNumber((previous) => {
-        if (previous === arrayMax) {
+        if (previous >= arrayMax) {
           return arrayMax
         } else return previous + 1
       })
@@ -56,8 +70,9 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
   }
 
   useEffect(() => {
-    if (myMessages.length > 0) {
+    if (myMessages.length > -1 && recallMsg) {
       ref.current.value = myMessages[oldMsgNumber]
+      console.log(myMessages[oldMsgNumber])
     }
   }, [oldMsgNumber, setOldMsgNumber])
 
@@ -71,6 +86,13 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
     ref.current.value = ""
   }
 
+  const handleEmpty = (e) => {
+    if (e.target.value === "") {
+      setRecallMsg(false)
+      setOldMsgNumber(myMessages.length)
+    }
+  }
+
   return (
     <>
       <Paper
@@ -81,6 +103,12 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
           width: `${chatWidth}%`,
         }}
       >
+        <Recall
+          oldMsgNumber={oldMsgNumber}
+          myMessages={myMessages}
+          recallMsg={recallMsg}
+          handleSendMessage={handleSendMessage}
+        />
         <BottomNavigation style={{ justifyContent: "left" }}>
           <Box
             style={{
@@ -101,6 +129,7 @@ const ChatInput = ({ sendMessage, chatWidth, myMessages }) => {
                 paddingLeft: "1em",
               }}
               onKeyDown={(e) => handleSendMessage(e)}
+              onChange={(e) => handleEmpty(e)}
               placeholder="Send a message"
               disableUnderline={true}
               inputRef={ref}
