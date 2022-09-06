@@ -93,16 +93,19 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
     return (
       <span
         style={{
-          fontSize: "0.5em",
-          marginLeft: "1em",
-          marginRight: "1em",
-          marginTop: "0.35em",
+          fontSize: "0.55em",
+          fontWeight: "bold",
           display: "flex",
+          width: "fit-content",
         }}
       >
         <span>{username}</span>
       </span>
     )
+  }
+
+  const toggleHoverReactions = () => {
+    setHoverReaction((previous) => !previous)
   }
 
   const reactionElement = () => {
@@ -112,21 +115,30 @@ const RegularMessageBlock = ({ msgObj, clientId, handleReaction }) => {
           style={{
             float: myMessage ? "right" : "left",
             zoom: 1.5,
+            width: "fit-content",
           }}
         >
           <span
-            style={{ display: "flex" }}
-            onMouseEnter={() => setHoverReaction(true)}
-            onMouseLeave={() => setHoverReaction(false)}
+            style={{ display: "flex", width: "fit-content" }}
+            onPointerDown={() => toggleHoverReactions()}
           >
             {msgObj.reactions.map((reaction, index) => (
               <span key={index} style={{ display: "flex", direction: "row" }}>
-                <FacebookCounterReaction
-                  key={index}
-                  reaction={reaction.emoji}
-                  bg={"#fff"}
-                  variant={"facebook"}
-                />
+                <span
+                  style={{
+                    marginRight: hoverReaction ? "0.3em" : "",
+                    marginLeft: hoverReaction ? "0.3em" : "",
+                    width: "fit-content",
+                    transition: "ease margin 0.3s",
+                  }}
+                >
+                  <FacebookCounterReaction
+                    key={index}
+                    reaction={reaction.emoji}
+                    bg={"#fff"}
+                    variant={"facebook"}
+                  />
+                </span>
                 {hoverReaction && hoverReactionElement(reaction.by)}
               </span>
             ))}

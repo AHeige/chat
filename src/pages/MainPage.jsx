@@ -331,7 +331,16 @@ const MainPage = () => {
             title={darkMode ? "Turn on the lights!" : "Turn off the lights!"}
           >
             <Button variant="outlined" onClick={toggleDarkMode}>
-              {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+              <span
+                style={{
+                  transform: darkMode
+                    ? `translate(0em, 10%)`
+                    : `translate(0.8em, -15%) rotate(0.2turn)`,
+                  transition: "ease-out transform 1s",
+                }}
+              >
+                {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+              </span>
             </Button>
           </Tooltip>
           <Tooltip title="Settings">
@@ -367,7 +376,7 @@ const MainPage = () => {
 
       <Grid container sx={{ overflow: "hidden" }}>
         <Grid item xs={12}>
-          <Game2D id="aster1" cid={clientId}></Game2D>
+          {/*  <Game2D id="aster1" cid={clientId}></Game2D> */}
         </Grid>
         <Chat
           messages={messages}
